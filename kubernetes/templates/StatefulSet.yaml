@@ -1,0 +1,98 @@
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: {{ template "kubernetes.name" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "kubernetes.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  serviceName: "cassandra"
+  updateStrategy:
+    type: "RollingUpdate"
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "kubernetes.name" . }}
+    spec:
+      nodeSelector:
+        type: worker
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - cassandra
+            topologyKey: kubernetes.io/hostname
+      subdomain: cassandra
+      terminationGracePeriodSeconds: 1800
+      containers:
+        - name: cassandra
+          image: quay.io/mysocialapp/cassandra:{{ .Values.cassandraImageVersion }}
+          command:
+            - "/run.sh"
+          env:
+            - name: MAX_HEAP_SIZE
+              value: {{ .Values.cassandraMaxHeap }}
+            - name: HEAP_NEWSIZE
+              value: 256M
+            - name: CASSANDRA_SEEDS
+              value: {{ template "kubernetes.name" . }}-0.cassandra.{{ .Release.Namespace }}.svc.4tech-fr.local
+            - name: CASSANDRA_CLUSTER_NAME
+              value: "{{ .Release.Namespace }}"
+            - name: CASSANDRA_DC
+              value: "4tech-fr"
+            - name: CASSANDRA_RACK
+              value: "Rack1"
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          securityContext:
+            capabilities:
+              add:
+                - IPC_LOCK
+                - SYS_RESOURCE
+          lifecycle:
+            postStart:
+              exec:
+                command: ["/usr/local/apache-cassandra/scripts/postStart.sh"]
+            preStop:
+              exec:
+                command: ["/usr/local/apache-cassandra/scripts/preStop.sh"]
+          readinessProbe:
+            exec:
+              command:
+              - /bin/bash
+              - -c
+              - /ready-probe.sh
+            initialDelaySeconds: 30
+            timeoutSeconds: 5
+          ports:
+            - containerPort: 7000
+              name: intra-node
+            - containerPort: 7001
+              name: tls-intra-node
+            - containerPort: 7199
+              name: jmx
+            - containerPort: 9042
+              name: cql
+          volumeMounts:
+            - name: cassandra-data
+              mountPath: /var/lib/cassandra
+            - name: {{ template "kubernetes.name" . }}
+              mountPath: /usr/local/apache-cassandra/scripts
+      volumes:
+        - name: cassandra-data
+          hostPath:
+            path: /mnt/data/{{ .Release.Namespace }}/cassandra
+        - name: {{ template "kubernetes.name" . }}
+          configMap:
+            name: {{ template "kubernetes.name" . }}
+            defaultMode: 0775

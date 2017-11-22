@@ -1,0 +1,57 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ template "kubernetes.name" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "kubernetes.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  run_override.sh: |-
+    #/bin/bash
+
+    # Replace node IP if diffent
+    if [ -f $CASSANDRA_DATA/OLD_POD_IP ] ; then
+      OLD_IP=$(cat $CASSANDRA_DATA/OLD_POD_IP)
+      if [ $OLD_IP != $POD_IP ] ; then
+        export CASSANDRA_REPLACE_NODE=$OLD_IP
+      fi
+    fi
+
+    /run.sh
+  postStart.sh: |-
+    #!/bin/sh
+
+    until /ready-probe.sh ; do
+      echo "Waiting node to be ready"
+      sleep 1
+    done
+
+    echo $POD_IP > $CASSANDRA_DATA/OLD_POD_IP
+  preStop.sh: |-
+    #!/bin/sh
+
+    run_nodetool() {
+      echo "Running: nodetool $1"
+      /usr/local/apache-cassandra/bin/nodetool $1
+      sleep 5
+    }
+
+    while [ $(/usr/local/apache-cassandra/bin/nodetool status | awk "/$CASSANDRA_RACK/{ print \$1,\$2 }" | grep -v $POD_IP | awk '{ print $1 }' | grep -v UN) -eq 0 ] ; do
+      echo "Waiting all nodes to recover a correct status before draining this node"
+      sleep 5
+      pidof java || exit 1
+    done
+
+    run_nodetool disablethrift
+    run_nodetool disablebinary
+    run_nodetool disablegossip
+    run_nodetool flush
+    run_nodetool drain
+    sleep 10
+    run_nodetool stop
+    run_nodetool stopdaemon
+
+    exit 0
