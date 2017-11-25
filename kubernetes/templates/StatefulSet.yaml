@@ -43,7 +43,7 @@ spec:
             - name: HEAP_NEWSIZE
               value: 256M
             - name: CASSANDRA_SEEDS
-              value: {{ template "kubernetes.name" . }}-0.cassandra.{{ .Release.Namespace }}.svc.4tech-fr.local
+              value: {{ template "kubernetes.name" . }}-0.cassandra.{{ .Release.Namespace }}.svc.4tech-fr.local,{{ template "kubernetes.name" . }}-1.cassandra.{{ .Release.Namespace }}.svc.4tech-fr.local
             - name: CASSANDRA_CLUSTER_NAME
               value: "{{ .Release.Namespace }}"
             - name: CASSANDRA_DC
