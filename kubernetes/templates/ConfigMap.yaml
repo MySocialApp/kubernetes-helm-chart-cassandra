@@ -10,7 +10,7 @@ metadata:
     heritage: {{ .Release.Service }}
 data:
   run_override.sh: |-
-    #/bin/bash
+    #/bin/sh
 
     # Replace node IP if diffent
     if [ -f $CASSANDRA_DATA/OLD_POD_IP ] ; then
@@ -30,6 +30,7 @@ data:
     done
 
     echo $POD_IP > $CASSANDRA_DATA/OLD_POD_IP
+    /usr/local/apache-cassandra/bin/nodetool repair
   preStop.sh: |-
     #!/bin/sh
 
