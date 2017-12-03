@@ -9,17 +9,18 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
-  serviceName: "cassandra"
+  serviceName: {{ template "kubernetes.name" . }}
   updateStrategy:
     type: "RollingUpdate"
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.cassandraReplicaCount }}
   template:
     metadata:
       labels:
         app: {{ template "kubernetes.name" . }}
+        deployedDate: "{{ .Release.cassandraDeployedDate }}"
     spec:
       nodeSelector:
-        type: worker
+        type: {{ .Values.cassandraNodeSelector }}
       affinity:
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -28,28 +29,37 @@ spec:
               - key: app
                 operator: In
                 values:
-                - cassandra
+                - {{ template "kubernetes.name" . }}
             topologyKey: kubernetes.io/hostname
-      subdomain: cassandra
+      subdomain: {{ template "kubernetes.name" . }}
       terminationGracePeriodSeconds: 1800
       containers:
         - name: cassandra
           image: quay.io/mysocialapp/cassandra:{{ .Values.cassandraImageVersion }}
-          command:
-            - "/run.sh"
+          command: ['/bin/sh', '-c', '/usr/local/apache-cassandra/scripts/run_override.sh']
           env:
             - name: MAX_HEAP_SIZE
               value: {{ .Values.cassandraMaxHeap }}
             - name: HEAP_NEWSIZE
-              value: 256M
-            - name: CASSANDRA_SEEDS
-              value: {{ template "kubernetes.name" . }}-0.cassandra.{{ .Release.Namespace }}.svc.4tech-fr.local,{{ template "kubernetes.name" . }}-1.cassandra.{{ .Release.Namespace }}.svc.4tech-fr.local
+              value: {{ .Values.cassandraHeapNewSize }}
+            - name: CASSANDRA_NUM_TOKENS
+              value: "256"
             - name: CASSANDRA_CLUSTER_NAME
               value: "{{ .Release.Namespace }}"
-            - name: CASSANDRA_DC
-              value: "4tech-fr"
             - name: CASSANDRA_RACK
               value: "Rack1"
+            - name: CASSANDRA_LISTEN_ADDRESS
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: CASSANDRA_BROADCAST_RPC_ADDRESS
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: CASSANDRA_BROADCAST_ADDRESS
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
             - name: POD_IP
               valueFrom:
                 fieldRef:
@@ -72,8 +82,8 @@ spec:
               - /bin/bash
               - -c
               - /ready-probe.sh
-            initialDelaySeconds: 30
-            timeoutSeconds: 5
+            initialDelaySeconds: 60
+            timeoutSeconds: 10
           ports:
             - containerPort: 7000
               name: intra-node

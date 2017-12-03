@@ -3,6 +3,9 @@ kind: Service
 metadata:
   name: {{ template "kubernetes.name" . }}
   namespace: {{ .Release.Namespace }}
+  annotations:
+    # https://github.com/kubernetes/examples/issues/89
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
   labels:
     app: {{ template "kubernetes.name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
