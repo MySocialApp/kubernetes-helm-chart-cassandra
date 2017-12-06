@@ -25,7 +25,9 @@ data:
       sleep 1
     done
 
-    /usr/local/apache-cassandra/bin/nodetool repair
+    if [ $(/usr/local/apache-cassandra/bin/nodetool status | grep '^UN' | wc -l) > 1 ] ; then
+      /usr/local/apache-cassandra/bin/nodetool repair
+    fi
   preStop.sh: |-
     #!/bin/sh
 
