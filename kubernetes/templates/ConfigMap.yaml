@@ -25,9 +25,8 @@ data:
       sleep 1
     done
 
-    if [ $(/usr/local/apache-cassandra/bin/nodetool status | grep '^UN' | wc -l) > 1 ] ; then
-      /usr/local/apache-cassandra/bin/nodetool repair
-    fi
+    nohup /usr/local/apache-cassandra/scripts/repair.sh &
+    exit 0
   preStop.sh: |-
     #!/bin/sh
 
@@ -53,3 +52,9 @@ data:
     run_nodetool stopdaemon
 
     exit 0
+  repair.sh: |-
+    while [ $(/usr/local/apache-cassandra/bin/nodetool status | grep '^UN' | wc -l) -ne {{ .Values.cassandraReplicaCount }} ] ; then
+      sleep 10
+    fi
+    sleep $[ ( $RANDOM % 1800 )  + 1 ]s
+    /usr/local/apache-cassandra/bin/nodetool repair
