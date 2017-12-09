@@ -12,7 +12,7 @@ data:
   run_override.sh: |-
     #/bin/sh
 
-    export CLUSTER_DOMAIN=$(awk '/^search/{print $NF}' /etc/resolv.conf)
+    export CLUSTER_DOMAIN=$(hostname -d | awk -F"." '{print $(NF-1),".",$NF}' | sed 's/ //g')
     export CASSANDRA_DC=$(echo $CLUSTER_DOMAIN | sed 's/.local//')
     export CASSANDRA_SEEDS={{ template "kubernetes.name" . }}-0.{{ template "kubernetes.name" . }}.{{ .Release.Namespace }}.svc.$CLUSTER_DOMAIN,{{ template "kubernetes.name" . }}-1.{{ template "kubernetes.name" . }}.{{ .Release.Namespace }}.svc.$CLUSTER_DOMAIN
 
