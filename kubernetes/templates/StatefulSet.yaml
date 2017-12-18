@@ -20,7 +20,9 @@ spec:
         deployedDate: "{{ .Release.cassandraDeployedDate }}"
     spec:
       nodeSelector:
-        type: {{ .Values.cassandraNodeSelector }}
+        {{- range $key, $val := .Values.cassandraNodeSelector }}
+        {{ $key }}: {{ $val | quote }}
+        {{- end}}
       affinity:
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -48,6 +50,8 @@ spec:
               value: "{{ .Release.Namespace }}"
             - name: CASSANDRA_RACK
               value: "Rack1"
+            - name: CASSANDRA_DC
+              value: "{{ .Values.cassandraDC }}"
             - name: CASSANDRA_LISTEN_ADDRESS
               valueFrom:
                 fieldRef:

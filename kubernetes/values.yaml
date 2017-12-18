@@ -1,5 +1,7 @@
 # Set where Cassandra local data should be located
-cassandraNodeSelector: worker
+cassandraNodeSelector:
+  node-role.kubernetes.io/node: "true"
+
 # Update deployed date to force a rolling upgrade
 cassandraDeployedDate: ""
 
@@ -12,3 +14,4 @@ cassandraMaxUnavailableNodes: 1
 cassandraImageVersion: "3.11.1-1"
 cassandraMaxHeap: 4G
 cassandraHeapNewSize: 256M
+cassandraDC: "DC1"
