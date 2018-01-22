@@ -37,7 +37,7 @@ spec:
       terminationGracePeriodSeconds: 1800
       containers:
         - name: cassandra
-          image: quay.io/mysocialapp/cassandra:{{ .Values.cassandraImageVersion }}
+          image: {{ .Values.cassandraImageName | default "quay.io/mysocialapp/cassandra" }}:{{ .Values.cassandraImageVersion }}
           command: ['/bin/sh', '-c', '/usr/local/apache-cassandra/scripts/run_override.sh']
           env:
             - name: MAX_HEAP_SIZE

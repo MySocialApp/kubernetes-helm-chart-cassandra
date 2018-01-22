@@ -11,7 +11,8 @@ cassandraReplicaCount: 3
 cassandraMaxUnavailableNodes: 1
 
 # Cassandra settings
-cassandraImageVersion: "3.11.1-1"
+cassandraImageName: "quay.io/mysocialapp/cassandra"
+cassandraImageVersion: "3.11.1-2"
 cassandraMaxHeap: 4G
 cassandraHeapNewSize: 256M
 cassandraDC: "DC1"
