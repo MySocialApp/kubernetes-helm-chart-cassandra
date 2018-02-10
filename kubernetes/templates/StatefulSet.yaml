@@ -86,8 +86,8 @@ spec:
               - /bin/bash
               - -c
               - /ready-probe.sh
-            initialDelaySeconds: 60
-            timeoutSeconds: 10
+            initialDelaySeconds: 120
+            timeoutSeconds: 30
           ports:
             - containerPort: 7000
               name: intra-node

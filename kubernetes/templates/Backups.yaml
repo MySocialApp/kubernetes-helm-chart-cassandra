@@ -1,0 +1,57 @@
+{{ if .Values.cassandraBackup.enableBackups }}
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ template "kubernetes.name" . }}-backup
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "kubernetes.name" . }}-backup
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  schedule: {{ .Values.cassandraBackup.backupSchedule | quote }}
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: cassandra-backup
+            image: quay.io/mysocialapp/docker-backup-common:{{ .Values.cassandraBackup.backupImageVersion }}
+            args:
+            - /bin/bash
+            - -c
+            - |
+              for instance in $(kubectl -n {{ .Release.Namespace }} get pod -l app={{ template "kubernetes.name" . }} | awk '{ print $1 }' | grep -v "^NAME") ; do
+                echo "Launching backup Cassandra: $instance"
+                kubectl -n {{ .Release.Namespace }} exec -it ${instance} /usr/local/apache-cassandra/scripts/snapshot2s3.sh "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY" "$PASSPHRASE" "$AWS_BUCKET" &
+              done
+
+              while [ $(jobs | wc -l) != 0 ] ; do
+                echo "Waiting 5 sec until jobs are finished"
+                sleep 5
+              done
+              sleep 300
+            env:
+              - name: AWS_ACCESS_KEY_ID
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ template "kubernetes.name" . }}
+                    key: AWS_ACCESS_KEY_ID
+              - name: AWS_SECRET_ACCESS_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ template "kubernetes.name" . }}
+                    key: AWS_SECRET_ACCESS_KEY
+              - name: PASSPHRASE
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ template "kubernetes.name" . }}
+                    key: AWS_PASSPHRASE
+              - name: AWS_BUCKET
+                value: "{{ .Values.cassandraBackup.awsBucket }}"
+          restartPolicy: OnFailure
+{{ end }}

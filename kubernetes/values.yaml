@@ -12,7 +12,20 @@ cassandraMaxUnavailableNodes: 1
 
 # Cassandra settings
 cassandraImageName: "quay.io/mysocialapp/cassandra"
-cassandraImageVersion: "3.11.1-2"
+cassandraImageVersion: "3.11.1-4"
 cassandraMaxHeap: 4G
 cassandraHeapNewSize: 256M
 cassandraDC: "DC1"
+
+# Backups
+cassandraBackup:
+  enableBackups: false
+  backupSchedule: "0 3 * * *"
+  backupImageVersion: v0.1
+  awsAccessKeyId: "xxx"
+  awsSecretAccessKey: "yyy"
+  awsPassphrase: "zzz"
+  awsBucket: "bucket_name"
+  #duplicityOptions: "--archive-dir /var/lib/cassandra/.duplicity --allow-source-mismatch --s3-european-buckets --s3-use-new-style --copy-links --num-retries 3 --s3-use-multiprocessing --s3-multipart-chunk-size 100 --volsize 1024 full . s3://s3.amazonaws.com/cassandra-backups/$CLUSTER_DOMAIN/$CASSANDRA_CLUSTER_NAME/$(hostname)"
+  awsDestinationPath: "s3://s3-eu-west-1.amazonaws.com/${AWS_BUCKET}/$CLUSTER_DOMAIN/$CASSANDRA_CLUSTER_NAME/$(hostname)"
+  restoreFolder: "/var/lib/cassandra/restore"
