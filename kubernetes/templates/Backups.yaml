@@ -12,7 +12,7 @@ metadata:
 spec:
   schedule: {{ .Values.cassandraBackup.backupSchedule | quote }}
   concurrencyPolicy: Forbid
-  successfulJobsHistoryLimit: 0
+  successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
   jobTemplate:
     spec:
@@ -27,14 +27,13 @@ spec:
             - |
               for instance in $(kubectl -n {{ .Release.Namespace }} get pod -l app={{ template "kubernetes.name" . }} | awk '{ print $1 }' | grep -v "^NAME") ; do
                 echo "Launching backup Cassandra: $instance"
-                kubectl -n {{ .Release.Namespace }} exec -it ${instance} /usr/local/apache-cassandra/scripts/snapshot2s3.sh "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY" "$PASSPHRASE" "$AWS_BUCKET" &
+                kubectl -n {{ .Release.Namespace }} exec ${instance} /usr/local/apache-cassandra/scripts/snapshot2s3.sh backup "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY" "$PASSPHRASE" "$AWS_BUCKET" &
               done
 
               while [ $(jobs | wc -l) != 0 ] ; do
                 echo "Waiting 5 sec until jobs are finished"
                 sleep 5
               done
-              sleep 300
             env:
               - name: AWS_ACCESS_KEY_ID
                 valueFrom:
