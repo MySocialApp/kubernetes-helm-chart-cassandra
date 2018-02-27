@@ -26,3 +26,11 @@ kubectl exec -it cassandra-0 bash
 
 RESTORE_TIME should be used as described in the [Duplicity manual Time Format section](http://duplicity.nongnu.org/duplicity.1.html#sect8).
 For example (3D to restore the the last 3 days backup)
+
+You can then use the script cassandra-restore.sh to restore a desired keyspace with all or one table:
+
+```bash
+/usr/local/apache-cassandra/scripts/cassandra-restore.sh /var/lib/cassandra/restore/var/lib/cassandra/data [keyspace]
+```
+
+Try to use help if you need more info about it.

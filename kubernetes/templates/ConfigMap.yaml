@@ -111,7 +111,8 @@ data:
       if [ $? != 0 ] ; then
         echo "Error during snapshot, please check manually, cleaning before exit"
         alert_failure "Error during snaptshot:\n$(cat /tmp/snapshot2s3.log)"
-        /usr/local/apache-cassandra/bin/nodetool clearsnapshot
+        clean
+        release_lock
         exit 1
       fi
       cat /tmp/snapshot2s3.log
@@ -124,6 +125,19 @@ data:
       for i in $(find . -name $snap_name | sed 's/^.\///') ; do
         rmdir /snap/$i
         ln -s /$i /snap/$i
+      done
+
+      # Dump schemas
+      mkdir -p /snap/var/lib/cassandra/schemas
+      for schema in $(ls /var/lib/cassandra/data) ; do
+        cqlsh --cqlversion=$CQLSH_VERSION -e "describe keyspace ${schema}" > /snap/var/lib/cassandra/schemas/${schema}.cql
+        if [ $? != 0 ] ; then
+          echo "Error while dumping schema ${schema}"
+          alert_failure "Error while dumping ${schema} schema"
+          clean
+          release_lock
+          exit 1
+        fi
       done
 
       # Transfer with duplicity
@@ -174,6 +188,7 @@ data:
     export AWS_BUCKET=$5
     export RESTORE_TIME=$6
     export CLUSTER_DOMAIN=$(hostname -d | awk -F"." '{print $(NF-1),".",$NF}' | sed 's/ //g')
+    export CQLSH_VERSION=3.4.4
 
     if [ $1 == "backup" ] ; then
       backup
@@ -185,3 +200,92 @@ data:
     else
       echo "Don't know what to do, please look help at ./$0"
     fi
+  cassandra-restore.sh: |-
+    #!/bin/bash
+
+    function help() {
+      echo "Usage: $0 <restore_data_folder> <keyspace> [<table>]"
+      echo '* restore_data_folder: the data folder restored from snapshot2s3.sh script'
+      echo '* keyspace: the keyspace to restore'
+      echo '* table: (optional field) the table name to restore (without uuid). If not set, all tables from a keyspace will be restored'
+      exit 1
+    }
+
+    function restore_table() {
+      ks=$1
+      tb=$2
+      echo -e "\n[+] Restoring ${ks}/${tb}"
+      /usr/local/apache-cassandra/bin/sstableloader -d $(hostname -A) ${ks}/${tb}
+    }
+
+    # Check number of args
+    test "$1" == 'help' && help
+    test "$#" -gt 1 || help
+
+    CQLSH_VERSION=3.4.4
+    RESTORE_DATA_FOLDER=$1
+    KEYSPACE=$2
+    TABLE=$3
+
+    # Ensure $RESTORE_DATA_FOLDER exist
+    if [ ! -d $RESTORE_DATA_FOLDER ] ; then
+      echo "$RESTORE_DATA_FOLDER doesn't exist, please check"
+      exit 1
+    fi
+    cd $RESTORE_DATA_FOLDER
+
+    # Ensure $KEYSPACE is present
+    if [ ! -d $KEYSPACE ] ; then
+      echo "$KEYSPACE is not found in $RESTORE_DATA_FOLDER folder, please ensure you've specified the data folder of the restore folder"
+      exit 1
+    fi
+
+    # Restore schema ?
+    echo 'Do you want to restore schema as well (y/n) ? (required for empty cassandra)'
+    read restore_schema
+    if [ "$restore_schema" != 'y' ] ; then
+      echo 'You decided to not restore schema'
+    else
+      echo 'You decided to restore schema'
+    fi
+
+    echo -e "\n[+]You're going to restore $KEYSPACE keyspace"
+    echo "Hit enter key when you're ready to proceed"
+    read
+
+    echo "[+] Flushing data to disk"
+    /usr/local/apache-cassandra/bin/nodetool flush
+
+    # Restore schema
+    if [ "$restore_schema" == 'y' ] ; then
+      if [ -f ../schemas/${KEYSPACE}.cql ] ; then
+        echo "[+] Restoring schema ${KEYSPACE}"
+        cqlsh --cqlversion=$CQLSH_VERSION < ../schemas/${KEYSPACE}.cql
+      else
+        echo "[+] SCHEMA ${KEYSPACE} MISSING !!! CAN'T RESTORE"
+      fi
+    fi
+
+    # Prepare snapshot to make it usable with sstableloader
+    for current_table in $(ls $KEYSPACE) ; do
+      table_name_path="$(find ./${KEYSPACE}/$current_table -name "snapshot_*")"
+      if [ "$(echo $table_name_path)" != "" ] ; then
+        echo "[+] Preparing ${KEYSPACE}/${current_table}"
+        table_name=$(echo $table_name_path | awk -F'/' '{ print $3 }' | sed -r 's/(\w+)-.*/\1/')
+        table_name_uuid=$(echo $table_name_path | sed -r 's/(.+)\/snapshots\/.+/\1/')
+        mv -v $table_name_path ${KEYSPACE}/$table_name
+        rm -Rf $table_name_uuid
+      fi
+    done
+
+    # Restore all tables or the desired one
+    if [ "$TABLE" == '' ] ; then
+      # Restore
+      for table_name in $(ls $KEYSPACE) ; do
+          restore_table $KEYSPACE $table_name
+      done
+    else
+      restore_table $KEYSPACE $TABLE
+    fi
+
+    echo "[+] Restore finished"

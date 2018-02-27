@@ -86,7 +86,7 @@ spec:
               - /bin/bash
               - -c
               - /ready-probe.sh
-            initialDelaySeconds: 120
+            initialDelaySeconds: 300
             timeoutSeconds: 30
           ports:
             - containerPort: 7000
