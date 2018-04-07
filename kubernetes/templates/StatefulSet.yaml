@@ -41,9 +41,9 @@ spec:
           command: ['/bin/sh', '-c', '/usr/local/apache-cassandra/scripts/run_override.sh']
           env:
             - name: MAX_HEAP_SIZE
-              value: {{ .Values.cassandraMaxHeap }}
+              value: {{ .Values.cassandraConfig.maxHeap }}
             - name: HEAP_NEWSIZE
-              value: {{ .Values.cassandraHeapNewSize }}
+              value: {{ .Values.cassandraConfig.heapNewSize }}
             - name: CASSANDRA_NUM_TOKENS
               value: "256"
             - name: CASSANDRA_CLUSTER_NAME
@@ -68,6 +68,32 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
+            - name: CASSANDRA_CONCURRENT_WRITES
+              value: "{{ default 32 .Values.cassandraConfig.concurrentWrites }}"
+            - name: CASSANDRA_CONCURRENT_READS
+              value: "{{ default 32 .Values.cassandraConfig.concurrentReads }}"
+            - name: CASSANDRA_CONCURRENT_COMPACTORS
+              value: "{{ default 4 .Values.cassandraConfig.concurrentCompactors }}"
+            - name: CASSANDRA_YAML_batch_size_warn_threshold_in_kb
+              value: "{{ default 5 .Values.cassandraConfig.batchSizeWarnThresholdInKb }}"
+            - name: CASSANDRA_YAML_batch_size_fail_threshold_in_kb
+              value: "{{ default 50 .Values.cassandraConfig.batchSizeFailThresholdInKb }}"
+            - name: CASSANDRA_COMPACTION_THROUGHPUT_MB_PER_SEC
+              value: "{{ default 16 .Values.cassandraConfig.compactionThroughputMbPerSec }}"
+            - name: CASSANDRA_YAML_hinted_handoff_throttle_in_kb
+              value: "{{ default 1024 .Values.cassandraConfig.hintedHandoffThrottleInKb }}"
+            - name: CASSANDRA_YAML_max_hints_delivery_threads
+              value: "{{ default 2 .Values.cassandraConfig.maxHintsDeliveryThreads }}"
+            - name: CASSANDRA_MEMTABLE_ALLOCATION_TYPE
+              value: {{ default "heap_buffers" .Values.cassandraConfig.memtableAllocationType }}
+            - name: CASSANDRA_MEMTABLE_FLUSH_WRITERS
+              value: "{{ default 1 .Values.cassandraConfig.memtableFlushWriter }}"
+            - name: CASSANDRA_MEMTABLE_CLEANUP_THRESHOLD
+              value: "{{ default 0.1 .Values.cassandraConfig.memtableCleanupThreshold }}"
+            - name: CASSANDRA_YAML_row_cache_size_in_mb
+              value: "{{ default 0 .Values.cassandraConfig.rowCacheSizeInMb }}"
+            - name: CASSANDRA_YAML_row_cache_save_period
+              value: "{{ default 0 .Values.cassandraConfig.rowCacheSavePeriod }}"
           securityContext:
             capabilities:
               add:
@@ -86,7 +112,7 @@ spec:
               - /bin/bash
               - -c
               - /ready-probe.sh
-            initialDelaySeconds: 300
+            initialDelaySeconds: 180
             timeoutSeconds: 30
           ports:
             - containerPort: 7000

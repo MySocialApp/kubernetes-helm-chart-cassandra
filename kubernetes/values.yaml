@@ -2,9 +2,6 @@
 cassandraNodeSelector:
   node-role.kubernetes.io/node: "true"
 
-# Update deployed date to force a rolling upgrade
-cassandraDeployedDate: ""
-
 # Number of nodes
 cassandraReplicaCount: 3
 # Number of maximum dead nodes
@@ -12,10 +9,24 @@ cassandraMaxUnavailableNodes: 1
 
 # Cassandra settings
 cassandraImageName: "quay.io/mysocialapp/cassandra"
-cassandraImageVersion: "3.11.1-4"
-cassandraMaxHeap: 4G
-cassandraHeapNewSize: 256M
+cassandraImageVersion: "3.11.1-5"
 cassandraDC: "DC1"
+cassandraConfig:
+  concurrentWrites: 128
+  concurrentReads: 128
+  concurrentCompactors: 2
+  batchSizeWarnThresholdInKb: 64
+  batchSizeFailThresholdInKb: 640
+  compactionThroughputMbPerSec: 150
+  heapNewSize: 256M
+  hintedHandoffThrottleInKb: 4096
+  maxHeap: 4G
+  maxHintsDeliveryThreads: 4
+  memtableAllocationType: "offheap_objects"
+  memtableFlushWriter: 4
+  memtableCleanupThreshold: 0.2
+  rowCacheSizeInMb: 128
+  rowCacheSavePeriod: 14400
 
 # Backups
 cassandraBackup:
