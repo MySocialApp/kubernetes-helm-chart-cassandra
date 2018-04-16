@@ -34,3 +34,42 @@ You can then use the script cassandra-restore.sh to restore a desired keyspace w
 ```
 
 Try to use help if you need more info about it.
+
+# Node replacement
+
+With the statefulset, it can be hard to send spectific parameters to a node. That's why there is an override script
+on boot to help on adding configuration parameters or specificities.
+
+Let's say you've a 6 nodes cluster and want to replace 2nd node (cassandra-1) because of corrupted data. First, look
+at the current status:
+```
+root@cassandra-0:/# /usr/local/apache-cassandra/bin/nodetool status
+Datacenter: dc1
+====================
+Status=Up/Down
+|/ State=Normal/Leaving/Joining/Moving
+--  Address         Load       Tokens       Owns (effective)  Host ID                               Rack
+UN  10.233.95.137   16.28 MiB  256          49.7%             eea07a91-5e4b-4864-83fe-0b308b7852ef  Rack1
+UN  10.233.82.219   15.63 MiB  256          50.5%             39fb9d94-3d38-423e-af52-8d41f1a1591d  Rack1
+DN  10.233.93.174   41.38 MiB  256          51.1%             8aa01735-1970-4c30-b107-5acf28a614a1  Rack1
+UN  10.233.95.211   16.61 MiB  256          48.6%             fc7065de-e4db-45f3-ac5b-86956e35df4f  Rack1
+UN  10.233.121.130  17.2 MiB   256          51.5%             8c817b60-3be5-4b59-99cc-91d1d116d711  Rack1
+UN  10.233.68.55    16.39 MiB  256          48.5%             e319c1c2-0b00-4377-b6f9-64dac1553d42  Rack1
+```
+
+To replace the dead node, edit configmap directly and add this line before run.sh:
+```
+run_override.sh: |-
+  #/bin/sh
+
+  export CLUSTER_DOMAIN=$(hostname -d | awk -F"." '{print $(NF-1),".",$NF}' | sed 's/ //g')
+  export CASSANDRA_SEEDS={{ template "kubernetes.name" . }}-0.{{ template "kubernetes.name" . }}.{{ .Release.Namespace }}.svc.$CLUSTER_DOMAIN,{{ template "kubernetes.name" . }}-1.{{ template "kubernetes.name" . }}.{{ .Release.Namespace }}.svc.$CLUSTER_DOMAIN
+
+  # Replace 10.233.93.174 with the ip of the node down
+  if $(hostname) == 'cassandra-1' && export CASSANDRA_REPLACE_NODE=10.233.93.174
+
+  /run.sh
+```
+
+Replace cassandra-1 and the IP address with yours. Then delete the content of the Cassandra data folder (with commit logs etc...) and delete the pod (here cassandra-1).
+It will then replace the dead one by resyncing the content and it could takes time depending on the data size. **Do not forget to remove the line previously inserted when finished**.
