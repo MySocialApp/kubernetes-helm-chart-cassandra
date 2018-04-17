@@ -1,0 +1,56 @@
+{{- if .Values.cassandraExporter.enabled }}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: cassandra-exporter
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: cassandra-exporter
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.cassandraExporter.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: cassandra-exporter
+    spec:
+      nodeSelector:
+        {{- range $key, $val := .Values.cassandraExporter.nodeSelector }}
+        {{ $key }}: {{ $val | quote }}
+        {{- end}}
+      containers:
+      - name: cassandra-exporter
+        image: "criteord/cassandra_exporter:{{ .Values.cassandraExporter.imageVersion }}"
+        imagePullPolicy: Always
+        env:
+          - name: CASSANDRA_EXPORTER_CONFIG_host
+            value: "{{ .Values.cassandraExporter.config.host }}"
+          - name: CASSANDRA_EXPORTER_CONFIG_listenPort
+            value: "{{ .Values.cassandraExporter.config.listenPort }}"
+          - name: JVM_OPTS
+            value: "-XX:+UseG1GC -Xms256M -Xmx512M
+                    -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
+                    -Dnetworkaddress.cache.ttl=15"
+        ports:
+        - name: metrics
+          containerPort: {{ .Values.cassandraExporter.config.listenPort }}
+          protocol: TCP
+        livenessProbe:
+          tcpSocket:
+            port: {{ .Values.cassandraExporter.config.listenPort }}
+        readinessProbe:
+          httpGet:
+            path: /metrics
+            port: {{ .Values.cassandraExporter.config.listenPort }}
+          initialDelaySeconds: 20
+          timeoutSeconds: 5
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 200m
+            memory: 512Mi
+{{- end }}

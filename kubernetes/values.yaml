@@ -40,3 +40,15 @@ cassandraBackup:
   #duplicityOptions: "--archive-dir /var/lib/cassandra/.duplicity --allow-source-mismatch --s3-european-buckets --s3-use-new-style --copy-links --num-retries 3 --s3-use-multiprocessing --s3-multipart-chunk-size 100 --volsize 1024 full . s3://s3.amazonaws.com/cassandra-backups/$CLUSTER_DOMAIN/$CASSANDRA_CLUSTER_NAME/$(hostname)"
   awsDestinationPath: "s3://s3-eu-west-1.amazonaws.com/${AWS_BUCKET}/$CLUSTER_DOMAIN/$CASSANDRA_CLUSTER_NAME/$(hostname)"
   restoreFolder: "/var/lib/cassandra/restore"
+
+# Cassandra Exporter
+cassandraExporter:
+  enabled: false
+  replicaCount: 1
+  imageVersion: 1.0.1
+  nodeSelector:
+    node-role.kubernetes.io/node: "true"
+  config:
+    host: cassandra:7199
+    listenPort: 8080
+cassandraPrometheusScrap: false

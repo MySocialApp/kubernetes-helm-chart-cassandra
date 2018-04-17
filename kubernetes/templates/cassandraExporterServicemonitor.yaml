@@ -1,0 +1,20 @@
+{{- if .Values.cassandraPrometheusScrap }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: cassandra-exporter-{{ .Release.Namespace }}
+  namespace: observability
+  labels:
+    app: cassandra-exporter
+    prometheus: observability
+spec:
+  selector:
+    matchLabels:
+      app: cassandra-exporter
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  endpoints:
+  - port: metrics
+    interval: 60s
+{{- end }}
