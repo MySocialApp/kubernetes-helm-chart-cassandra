@@ -45,7 +45,7 @@ spec:
             path: /metrics
             port: {{ .Values.cassandraExporter.config.listenPort }}
           initialDelaySeconds: 20
-          timeoutSeconds: 5
+          timeoutSeconds: 45
         resources:
           requests:
             cpu: 200m
