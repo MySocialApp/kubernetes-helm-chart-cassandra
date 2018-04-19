@@ -30,7 +30,8 @@ spec:
           - name: CASSANDRA_EXPORTER_CONFIG_listenPort
             value: "{{ .Values.cassandraExporter.config.listenPort }}"
           - name: JVM_OPTS
-            value: "-XX:+UseG1GC -Xms256M -Xmx512M
+            value: "{{ .Values.cassandraExporter.config.jvmOpts }}
+                    -XX:+UseG1GC
                     -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
                     -Dnetworkaddress.cache.ttl=15"
         ports:

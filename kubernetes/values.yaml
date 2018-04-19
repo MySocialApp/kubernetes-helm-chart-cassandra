@@ -51,4 +51,5 @@ cassandraExporter:
   config:
     host: cassandra:7199
     listenPort: 8080
+    jvmOpts: "-Xms256M -Xmx512M"
 cassandraPrometheusScrap: false
