@@ -50,8 +50,8 @@ spec:
         resources:
           requests:
             cpu: 200m
-            memory: 256Mi
+            memory: {{ .Values.cassandraExporter.resources.memory.requests }}
           limits:
             cpu: 200m
-            memory: 512Mi
+            memory: {{ .Values.cassandraExporter.resources.memory.limits }}
 {{- end }}
