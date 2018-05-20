@@ -15,6 +15,9 @@ spec:
       port: 8080
       targetPort: {{ .Values.cassandraExporter.config.listenPort }}
       protocol: TCP
+    - name: jmx
+      port: 5555
+      targetPort: 5555
   selector:
     app: cassandra-exporter
 {{- end }}

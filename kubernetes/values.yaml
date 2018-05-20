@@ -45,11 +45,18 @@ cassandraBackup:
 cassandraExporter:
   enabled: false
   replicaCount: 1
-  imageVersion: 1.0.1
+  imageVersion: 1.0.2
   nodeSelector:
     node-role.kubernetes.io/node: "true"
+  resources:
+    limits:
+      cpu: 300m
+      memory: 500Mi
+    requests:
+      cpu: 300m
+      memory: 500Mi
   config:
     host: cassandra:7199
     listenPort: 8080
-    jvmOpts: "-Xms256M -Xmx512M"
+    jvmOpts: ""
 cassandraPrometheusScrap: false
