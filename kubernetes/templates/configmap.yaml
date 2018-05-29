@@ -9,22 +9,40 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 data:
-  run_override.sh: |-
-    #/bin/sh
+  envVars.sh: |-
+    #!/bin/bash
 
     export CLUSTER_DOMAIN=$(hostname -d | awk -F"." '{print $(NF-1),".",$NF}' | sed 's/ //g')
     export CASSANDRA_SEEDS={{ template "kubernetes.name" . }}-0.{{ template "kubernetes.name" . }}.{{ .Release.Namespace }}.svc.$CLUSTER_DOMAIN,{{ template "kubernetes.name" . }}-1.{{ template "kubernetes.name" . }}.{{ .Release.Namespace }}.svc.$CLUSTER_DOMAIN
+  run_override.sh: |-
+    #/bin/sh
+
+    source /usr/local/apache-cassandra/scripts/envVars.sh
 
     /run.sh
   postStart.sh: |-
-    #!/bin/sh
+    #!/bin/bash
+    source /usr/local/apache-cassandra/scripts/envVars.sh
 
     until /ready-probe.sh ; do
       echo "Waiting node to be ready"
       sleep 1
     done
 
-    nohup /usr/local/apache-cassandra/scripts/repair.sh &
+    {{- if .Values.cassandraReaper.enabled }}
+    # Wait until replicas is 3 to ready Cassandra Reaper database
+    if [ "$(hostname)" == 'cassandra-2' ] ; then
+      cqlsh --cqlversion=$CQLSH_VERSION -e "CREATE KEYSPACE IF NOT EXISTS reaper_db WITH replication = {'class': 'NetworkTopologyStrategy', '{{ .Values.cassandraDC }}': 3};" > reaperdb.log
+    fi
+    {{- end }}
+
+    {{- if .Values.cassandraReaperRegister.enabled }}
+    # Register cluster into Cassandra Reaper
+    # Registering cassandra-0 when cassandra-2 is ready
+    if [ "$(hostname)" == 'cassandra-2' ] ; then
+      curl -X POST "http://{{ .Values.cassandraReaperRegister.reaperServerServiceName }}/cluster?seedHost=$(hostname -A | sed 's/^cassandra-2/cassandra-0/' )" > reaper.log 2>&1
+    fi
+    {{- end }}
     exit 0
   preStop.sh: |-
     #!/bin/sh
@@ -51,12 +69,6 @@ data:
     run_nodetool stopdaemon
 
     exit 0
-  repair.sh: |-
-    while [ $(/usr/local/apache-cassandra/bin/nodetool status | grep '^UN' | wc -l) -ne {{ .Values.cassandraReplicaCount }} ] ; then
-      sleep 10
-    fi
-    sleep $[ ( $RANDOM % 1800 )  + 1 ]s
-    /usr/local/apache-cassandra/bin/nodetool repair
   snapshot2s3.sh: |-
     #!/bin/bash
 
@@ -182,13 +194,12 @@ data:
     # Check number of args
     test "$#" -lt 5 && help
 
+    source /usr/local/apache-cassandra/scripts/envVars.sh
     export AWS_ACCESS_KEY_ID=$2
     export AWS_SECRET_ACCESS_KEY=$3
     export PASSPHRASE=$4
     export AWS_BUCKET=$5
     export RESTORE_TIME=$6
-    export CLUSTER_DOMAIN=$(hostname -d | awk -F"." '{print $(NF-1),".",$NF}' | sed 's/ //g')
-    export CQLSH_VERSION=3.4.4
 
     if [ $1 == "backup" ] ; then
       backup
@@ -222,7 +233,7 @@ data:
     test "$1" == 'help' && help
     test "$#" -gt 1 || help
 
-    CQLSH_VERSION=3.4.4
+    source /usr/local/apache-cassandra/scripts/envVars.sh
     RESTORE_DATA_FOLDER=$1
     KEYSPACE=$2
     TABLE=$3

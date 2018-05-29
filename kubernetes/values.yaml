@@ -60,3 +60,44 @@ cassandraExporter:
     listenPort: 8080
     jvmOpts: ""
 cassandraPrometheusScrap: false
+
+# Cassandra Reaper Client register
+cassandraReaperRegister:
+  enabled: false
+  reaperServerServiceName: cassandra-reaper.svc
+
+# Cassandra Reaper Server
+cassandraReaper:
+  enabled: false
+  replicaCount: 1
+  imageVersion: 1.1.0
+  nodeSelector:
+    node-role.kubernetes.io/node: "true"
+  contactPoints: cassandra-0.cassandra
+  jmxAuth:
+    username: reaperUser
+    password: reaperPass
+  # clusterName:
+  # keyspace: reaper_db
+  envVariables:
+    JAVA_OPTS: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
+    REAPER_CASS_KEYSPACE: reaper_db
+    REAPER_REPAIR_PARALELLISM: DATACENTER_AWARE
+    REAPER_REPAIR_INTENSITY: 0.5
+    REAPER_AUTO_SCHEDULING_ENABLED: true
+    REAPER_SCHEDULE_DAYS_BETWEEN: 2
+    REAPER_REPAIR_RUN_THREADS: 16
+    REAPER_HANGING_REPAIR_TIMEOUT_MINS: 30
+    REAPER_REPAIR_MANAGER_SCHEDULING_INTERVAL_SECONDS: 10
+    REAPER_SEGMENT_COUNT: 200
+    REAPER_LOGGING_ROOT_LEVEL: INFO
+    REAPER_SERVER_ADMIN_PORT: 8081
+    REAPER_SERVER_APP_PORT: 8080
+    REAPER_METRICS_ENABLED: true
+  resources:
+    limits:
+      cpu: 500m
+      memory: 500Mi
+    requests:
+      cpu: 500m
+      memory: 500Mi

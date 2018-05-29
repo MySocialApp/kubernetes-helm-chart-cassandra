@@ -1,0 +1,25 @@
+{{- if .Values.cassandraReaper.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: cassandra-reaper
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: cassandra-reaper
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  ports:
+    - name: app
+      port: 80
+      targetPort: {{ .Values.cassandraReaper.envVariables.REAPER_SERVER_APP_PORT }}
+    - name: admin
+      port: {{ .Values.cassandraReaper.envVariables.REAPER_SERVER_ADMIN_PORT }}
+      targetPort: {{ .Values.cassandraReaper.envVariables.REAPER_SERVER_ADMIN_PORT }}
+    - name: jmx
+      port: 7199
+      targetPort: 7199
+  selector:
+    app: cassandra-reaper
+{{- end }}

@@ -35,7 +35,27 @@ You can then use the script cassandra-restore.sh to restore a desired keyspace w
 
 Try to use help if you need more info about it.
 
-# Node replacement
+# Managed Cassandra repairs
+
+You can enable [Cassandra Reaper](http://cassandra-reaper.io) within your cluster to get self managed Cassandra repairs.
+
+[A graphical interface is available](http://cassandra-reaper.svc) with an API. You have to enable a reaper server and server registration from the config:
+
+```yaml
+# Cassandra Reaper Client register
+cassandraReaperRegister:
+  enabled: false
+  reaperServerServiceName: cassandra-reaper.svc
+
+# Cassandra Reaper Server
+cassandraReaper:
+  enabled: true
+```
+
+Then configure the settings to make it work as expected. The backend is forced to Cassandra to get Reaper persistence, distribution and high availability.
+
+# FAQ
+## How to replace a Node?
 
 With the statefulset, it can be hard to send spectific parameters to a node. That's why there is an override script
 on boot to help on adding configuration parameters or specificities.
