@@ -32,15 +32,37 @@ data:
     {{- if .Values.cassandraReaper.enabled }}
     # Wait until replicas is 3 to ready Cassandra Reaper database
     if [ "$(hostname)" == 'cassandra-2' ] ; then
-      cqlsh --cqlversion=$CQLSH_VERSION -e "CREATE KEYSPACE IF NOT EXISTS reaper_db WITH replication = {'class': 'NetworkTopologyStrategy', '{{ .Values.cassandraDC }}': 3};" > reaperdb.log
+      cqlsh -e "CREATE KEYSPACE IF NOT EXISTS reaper_db WITH replication = {'class': 'NetworkTopologyStrategy', '{{ .Values.cassandraDC }}': 3};" > /var/log/reaperdb.log
     fi
     {{- end }}
 
     {{- if .Values.cassandraReaperRegister.enabled }}
     # Register cluster into Cassandra Reaper
-    # Registering cassandra-0 when cassandra-2 is ready
-    if [ "$(hostname)" == 'cassandra-2' ] ; then
-      curl -X POST "http://{{ .Values.cassandraReaperRegister.reaperServerServiceName }}/cluster?seedHost=$(hostname -A | sed 's/^cassandra-2/cassandra-0/' )" > reaper.log 2>&1
+    # Do not target current instance to avoid unready instance status (and registration failure)
+    if [ "$(hostname)" == 'cassandra-0' ] ; then
+      seedHost=$(hostname -A | sed 's/^cassandra-0/cassandra-1/')
+    else
+      seedHost=$(hostname -A | sed -r 's/^cassandra-\w+(\..+)/cassandra-0\1/')
+    fi
+
+    # Check if cluster needs to be registred or simply updated
+    counter=0
+    if [ $(curl -s "http://{{ .Values.cassandraReaperRegister.reaperServerServiceName }}/cluster" | grep -c $CASSANDRA_CLUSTER_NAME) == 0 ] ; then
+      while [ $(curl -s -I -X POST "http://{{ .Values.cassandraReaperRegister.reaperServerServiceName }}/cluster?seedHost=$seedHost" | grep -c "^HTTP/1.1 201 Created") != 1 ] ; do
+        if [ $counter == 5 ] ; then
+          break
+        fi
+        counter=$((counter+1))
+        sleep 5
+      done
+    else
+      while [ $(curl -s -I -X PUT "http://{{ .Values.cassandraReaperRegister.reaperServerServiceName }}/cluster/${CASSANDRA_CLUSTER_NAME}?seedHost=$seedHost" | egrep -c "^HTTP/1.1 (200|304)") != 1 ] ; do
+        if [ $counter == 5 ] ; then
+          break
+        fi
+        counter=$((counter+1))
+        sleep 5
+      done
     fi
     {{- end }}
     exit 0
@@ -141,8 +163,8 @@ data:
 
       # Dump schemas
       mkdir -p /snap/var/lib/cassandra/schemas
-      for schema in $(ls /var/lib/cassandra/data) ; do
-        cqlsh --cqlversion=$CQLSH_VERSION -e "describe keyspace ${schema}" > /snap/var/lib/cassandra/schemas/${schema}.cql
+      for schema in $(cqlsh -e "select keyspace_name from system_schema.keyspaces;" | egrep "^\s+" | awk '{ print $1 }' | grep -v keyspace_name) ; do
+        cqlsh -e "describe keyspace ${schema}" > /snap/var/lib/cassandra/schemas/${schema}.cql
         if [ $? != 0 ] ; then
           echo "Error while dumping schema ${schema}"
           alert_failure "Error while dumping ${schema} schema"
@@ -271,7 +293,7 @@ data:
     if [ "$restore_schema" == 'y' ] ; then
       if [ -f ../schemas/${KEYSPACE}.cql ] ; then
         echo "[+] Restoring schema ${KEYSPACE}"
-        cqlsh --cqlversion=$CQLSH_VERSION < ../schemas/${KEYSPACE}.cql
+        cqlsh < ../schemas/${KEYSPACE}.cql
       else
         echo "[+] SCHEMA ${KEYSPACE} MISSING !!! CAN'T RESTORE"
       fi
