@@ -128,6 +128,39 @@ spec:
               mountPath: /var/lib/cassandra
             - name: {{ template "kubernetes.name" . }}
               mountPath: /usr/local/apache-cassandra/scripts
+        {{- if .Values.cassandraExporter.enabled }}
+        - name: cassandra-exporter
+          image: "criteord/cassandra_exporter:{{ .Values.cassandraExporter.imageVersion }}"
+          env:
+            - name: CASSANDRA_EXPORTER_CONFIG_host
+              value: "{{ .Values.cassandraExporter.config.host }}"
+            - name: CASSANDRA_EXPORTER_CONFIG_listenPort
+              value: "{{ .Values.cassandraExporter.config.listenPort }}"
+            - name: JVM_OPTS
+              value: "{{ .Values.cassandraExporter.config.jvmOpts }}
+                      -Dcom.sun.management.jmxremote.ssl=false
+                      -Dcom.sun.management.jmxremote.authenticate=false
+                      -Dcom.sun.management.jmxremote.port=5555
+                      -Dcom.sun.management.jmxremote.local.only=false
+                      -Dnetworkaddress.cache.ttl=15"
+          ports:
+          - name: metrics
+            containerPort: {{ .Values.cassandraExporter.config.listenPort }}
+            protocol: TCP
+          - name: jmx
+            containerPort: 5555
+          livenessProbe:
+            tcpSocket:
+              port: {{ .Values.cassandraExporter.config.listenPort }}
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: {{ .Values.cassandraExporter.config.listenPort }}
+            initialDelaySeconds: 20
+            timeoutSeconds: 45
+          resources:
+{{ toYaml .Values.cassandraExporter.resources | indent 12 }}
+        {{- end }}
       volumes:
         - name: cassandra-data
           hostPath:

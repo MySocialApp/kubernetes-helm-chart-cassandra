@@ -18,5 +18,14 @@ spec:
       name: cassandra
     - name: jmx
       port: 7199
+    {{- if .Values.cassandraExporter.enabled }}
+    - name: metrics
+      port: 8080
+      targetPort: {{ .Values.cassandraExporter.config.listenPort }}
+      protocol: TCP
+    - name: jmx-exporter
+      port: 5555
+      targetPort: 5555
+    {{- end }}
   selector:
     app: {{ template "kubernetes.name" . }}

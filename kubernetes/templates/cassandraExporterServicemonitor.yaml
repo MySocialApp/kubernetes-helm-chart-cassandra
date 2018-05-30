@@ -2,15 +2,15 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: cassandra-exporter-{{ .Release.Namespace }}
+  name: cassandra-{{ .Release.Namespace }}
   namespace: observability
   labels:
-    app: cassandra-exporter
+    app: cassandra
     prometheus: observability
 spec:
   selector:
     matchLabels:
-      app: cassandra-exporter
+      app: cassandra
   namespaceSelector:
     matchNames:
       - {{ .Release.Namespace }}
