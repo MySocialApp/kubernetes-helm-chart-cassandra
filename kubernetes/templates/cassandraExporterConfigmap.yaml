@@ -1,0 +1,17 @@
+{{- if .Values.cassandraAlertmanager.alertsEnabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "kubernetes.name" . }}-alerts
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "kubernetes.name" . }}-alerts
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    heritage: {{ .Release.Service }}
+    prometheus: {{ .Release.Namespace }}
+    release: {{ .Release.Name }}
+    role: alert-rules
+data:
+  elasticsearch.rules: |-
+    {{- include "cassandra.rules.yaml.tpl" . | indent 4}}
+{{ end }}

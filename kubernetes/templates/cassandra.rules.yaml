@@ -1,0 +1,21 @@
+{{ define "cassandra.rules.yaml.tpl" }}
+groups:
+- name: elasticsearch.rules
+  rules:
+  - alert: Cassandra_One_Node_Lost
+    expr: kube_statefulset_replicas{namespace="{{ .Release.Namespace }}",statefulset="cassandra"} - kube_statefulset_status_replicas{namespace="{{ .Release.Namespace }}",statefulset="cassandra"} == 1
+    for: 2m
+    labels:
+{{ toYaml .Values.cassandraAlertmanager.alertLabels.sloInterrupt | indent 6 }}
+    annotations:
+      description: "There is one instance down on Cassandra cluster."
+      summary: "There is one instance down on Cassandra cluster."
+  - alert: Cassandra_Two_Or_More_Nodes_Lost
+    expr: kube_statefulset_replicas{namespace="{{ .Release.Namespace }}",statefulset="cassandra"} - kube_statefulset_status_replicas{namespace="{{ .Release.Namespace }}",statefulset="cassandra"} > 1
+    for: 2m
+    labels:
+{{ toYaml .Values.cassandraAlertmanager.alertLabels.sloPage | indent 6 }}
+    annotations:
+      description: "There is two or more nodes down on Cassandra cluster."
+      summary: "There is two or more nodes down on Cassandra cluster."
+{{ end }}
