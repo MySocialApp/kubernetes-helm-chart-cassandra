@@ -1,6 +1,6 @@
 {{ define "cassandra.rules.yaml.tpl" }}
 groups:
-- name: elasticsearch.rules
+- name: cassandra.rules
   rules:
   - alert: Cassandra_One_Node_Lost
     expr: kube_statefulset_replicas{namespace="{{ .Release.Namespace }}",statefulset="cassandra"} - kube_statefulset_status_replicas{namespace="{{ .Release.Namespace }}",statefulset="cassandra"} == 1
@@ -18,4 +18,20 @@ groups:
     annotations:
       description: "There is two or more nodes down on Cassandra cluster."
       summary: "There is two or more nodes down on Cassandra cluster."
+  - alert: Cassandra_Exporter_Memory_Warning
+    expr: max(container_memory_usage_bytes{namespace="{{ .Release.Namespace }}",pod_name=~"cassandra-\\d+", container_name="cassandra-exporter"}) by (container_name) / min(kube_pod_container_resource_limits_memory_bytes{namespace="{{ .Release.Namespace }}", container="cassandra-exporter"}) by (container) * 100 > 65
+    for: 1m
+    labels:
+{{ toYaml .Values.cassandraAlertmanager.alertLabels.sloInterrupt | indent 6 }}
+    annotations:
+      description: "Cassandra exporter memory limit warning."
+      summary: "Cassandra exporter memory reached {{`{{$value}}`}}%. You need to upgrade its memory to avoid Cassandra pod issues."
+  - alert: Cassandra_Exporter_Memory_Critical
+    expr: max(container_memory_usage_bytes{namespace="{{ .Release.Namespace }}",pod_name=~"cassandra-\\d+", container_name="cassandra-exporter"}) by (container_name) / min(kube_pod_container_resource_limits_memory_bytes{namespace="{{ .Release.Namespace }}", container="cassandra-exporter"}) by (container) * 100 > 80
+    for: 1m
+    labels:
+{{ toYaml .Values.cassandraAlertmanager.alertLabels.sloPage | indent 6 }}
+    annotations:
+      description: "Cassandra exporter memory limit warning."
+      summary: "Cassandra exporter memory reached {{`{{$value}}`}}%. You need to upgrade its memory to avoid Cassandra pod issues."
 {{ end }}
