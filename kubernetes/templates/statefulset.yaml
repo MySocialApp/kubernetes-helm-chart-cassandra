@@ -131,6 +131,7 @@ spec:
         {{- if .Values.cassandraExporter.enabled }}
         - name: cassandra-exporter
           image: "criteord/cassandra_exporter:{{ .Values.cassandraExporter.imageVersion }}"
+          command: ['/bin/sh', '-c', '/usr/local/apache-cassandra/scripts/exporter_run_override.sh']
           env:
             - name: CASSANDRA_EXPORTER_CONFIG_host
               value: "{{ .Values.cassandraExporter.config.host }}"
@@ -164,6 +165,9 @@ spec:
             timeoutSeconds: 45
           resources:
 {{ toYaml .Values.cassandraExporter.resources | indent 12 }}
+          volumeMounts:
+            - name: {{ template "kubernetes.name" . }}
+              mountPath: /usr/local/apache-cassandra/scripts
         {{- end }}
       volumes:
         - name: cassandra-data
