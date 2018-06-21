@@ -98,7 +98,7 @@ cassandraReaper:
   # clusterName:
   # keyspace: reaper_db
   envVariables:
-    JAVA_OPTS: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
+    JAVA_OPTS: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAMFraction=2 -XX:+AlwaysPreTouch"
     REAPER_CASS_KEYSPACE: reaper_db
     REAPER_REPAIR_PARALELLISM: DATACENTER_AWARE
     REAPER_REPAIR_INTENSITY: 0.5
