@@ -1,4 +1,4 @@
-# kubernetes-helm-chart-cassandra
+# kubernetes-helm-chart-cassandra [![Build Status](https://travis-ci.org/MySocialApp/kubernetes-helm-chart-cassandra.svg?branch=master)](https://travis-ci.org/MySocialApp/kubernetes-helm-chart-cassandra)
 
 You can find here a helm chart we're using at [MySocialApp](https://mysocialapp.io) (iOS and Android social app builder - SaaS)
 

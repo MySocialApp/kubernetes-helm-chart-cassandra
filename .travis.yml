@@ -1,0 +1,20 @@
+---
+language: python
+
+env:
+  global:
+    - HELM_URL=https://storage.googleapis.com/kubernetes-helm
+    - HELM_TGZ=helm-v2.9.1-linux-amd64.tar.gz
+
+install:
+  # Installing Helm
+  - wget -q ${HELM_URL}/${HELM_TGZ}
+  - tar xzfv ${HELM_TGZ}
+  - PATH=`pwd`/linux-amd64/:$PATH
+  - helm init --client-only
+
+script:
+  # Rename Chart name to avoid linting error
+  - sed -ri 's/^(name:)\s*\w+/\1 kubernetes/' kubernetes/Chart.yaml
+  # Check charts format
+  - helm lint kubernetes
