@@ -59,7 +59,22 @@ cassandraExporter:
     host: 127.0.0.1:7199
     listenPort: 8080
     jvmOpts: ""
+
+# Prometheus scraping & alerting
 cassandraPrometheusScrap: false
+cassandraAlertmanager:
+  alertsEnabled: false
+  alertLabels:
+    sloInterrupt:
+      serviceLevel: objective
+      severity: interrupt
+      team: infra
+      type: functional
+    sloPage:
+      serviceLevel: objective
+      severity: page
+      team: infra
+      type: functional
 
 # Cassandra Reaper Client register
 cassandraReaperRegister:
