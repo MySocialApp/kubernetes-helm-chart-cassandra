@@ -128,7 +128,7 @@ spec:
               mountPath: /var/lib/cassandra
             - name: {{ template "kubernetes.name" . }}
               mountPath: /usr/local/apache-cassandra/scripts
-        {{- if .Values.cassandraExporter.enabled }}
+        {{- if .Values.cassandraExporter.enableExporter }}
         - name: cassandra-exporter
           image: "criteord/cassandra_exporter:{{ .Values.cassandraExporter.imageVersion }}"
           command: ['/bin/sh', '-c', '/usr/local/apache-cassandra/scripts/exporter_run_override.sh']

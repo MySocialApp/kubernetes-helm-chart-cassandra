@@ -18,7 +18,7 @@ spec:
       name: cassandra
     - name: jmx
       port: 7199
-    {{- if .Values.cassandraExporter.enabled }}
+    {{- if .Values.cassandraExporter.enableExporter }}
     - name: metrics
       port: 8080
       targetPort: {{ .Values.cassandraExporter.config.listenPort }}

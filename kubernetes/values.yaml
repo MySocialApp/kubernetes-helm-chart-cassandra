@@ -43,7 +43,7 @@ cassandraBackup:
 
 # Cassandra Exporter
 cassandraExporter:
-  enabled: false
+  enableExporter: false
   replicaCount: 1
   imageVersion: 1.0.2
   nodeSelector:
@@ -60,10 +60,13 @@ cassandraExporter:
     listenPort: 8080
     jvmOpts: ""
 
-# Prometheus scraping & alerting
-cassandraPrometheusScrap: false
+# Prometheus scraping
+cassandraPrometheusScrap:
+  enableScrap: false
+
+# Alertmanager
 cassandraAlertmanager:
-  alertsEnabled: false
+  enableAlerts: false
   alertLabels:
     sloInterrupt:
       serviceLevel: objective
@@ -78,12 +81,12 @@ cassandraAlertmanager:
 
 # Cassandra Reaper Client register
 cassandraReaperRegister:
-  enabled: false
+  enableReaperRegister: false
   reaperServerServiceName: cassandra-reaper.svc
 
 # Cassandra Reaper Server
 cassandraReaper:
-  enabled: false
+  enableReaper: false
   replicaCount: 1
   imageVersion: 1.1.0
   nodeSelector:

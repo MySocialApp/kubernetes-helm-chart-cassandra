@@ -36,7 +36,7 @@ data:
     fi
     {{- end }}
 
-    {{- if .Values.cassandraReaperRegister.enabled }}
+    {{- if .Values.cassandraReaperRegister.enableReaperRegister }}
     # Register cluster into Cassandra Reaper
     # Do not target current instance to avoid unready instance status (and registration failure)
     if [ "$(hostname)" == 'cassandra-0' ] ; then

@@ -14,7 +14,9 @@ install:
   - helm init --client-only
 
 script:
-  # Rename Chart name to avoid linting error
-  - sed -ri 's/^(name:)\s*\w+/\1 kubernetes/' kubernetes/Chart.yaml
+  # Rename Chart name to avoid linting error and enable all features
+  - >
+    sed -ri 's/^(name:)\s*\w+/\1 kubernetes/' kubernetes/Chart.yaml ;
+    sed -ri 's/(\s*enable\w+):\s*false/\1: true/g' kubernetes/values.yaml
   # Check charts format
   - helm lint kubernetes
