@@ -2,9 +2,9 @@
 
 You can find here a helm chart we're using at [MySocialApp](https://mysocialapp.io) (iOS and Android social app builder - SaaS)
 
-Kubernetes Helm Chart for Cassandra
+This is a Kubernetes Helm Chart for Cassandra.
 
-# Backups
+## Backups
 
 You can automatically backup on AWS S3. A cronjob exist for it, you simple have to set the "cassandraBackup" parameters.
 
@@ -35,7 +35,7 @@ You can then use the script cassandra-restore.sh to restore a desired keyspace w
 
 Try to use help if you need more info about it.
 
-# Managed Cassandra repairs
+## Managed Cassandra repairs
 
 You can enable [Cassandra Reaper](http://cassandra-reaper.io) within your cluster to get self managed Cassandra repairs.
 
@@ -44,7 +44,7 @@ You can enable [Cassandra Reaper](http://cassandra-reaper.io) within your cluste
 ```yaml
 # Cassandra Reaper Client register
 cassandraReaperRegister:
-  enabled: false
+  enabled: true
   reaperServerServiceName: cassandra-reaper.svc
 
 # Cassandra Reaper Server
@@ -52,7 +52,46 @@ cassandraReaper:
   enabled: true
 ```
 
-Then configure the settings to make it work as expected. The backend is forced to Cassandra to get Reaper persistence, distribution and high availability.
+Then configure the other settings to make it work as you want.
+
+Note: The backend is forced to Cassandra to get Reaper persistence, distribution and high availability.
+
+## Prometheus exporter
+
+You can setup [Cassandra exporter](https://github.com/criteo/cassandra_exporter) to grab info from each cluster nodes and export them in Prometheus format simply
+by updating those lines:
+
+```yaml
+# Cassandra Exporter
+cassandraExporter:
+  enabled: true
+```
+
+Update as well other settings if you need.
+
+Important: scraping outside the statefulset can multiply x10 the scraping time. That's why exporters are as close as possible from Cassandra nodes. That also mean that
+you have to side the limits properly to avoid Kubernetes CrashloopBackoff because of Java OOM. It is strongly advised to monitor memory usage of the exporter.
+
+## Prometheus
+
+If you're using [Prometheus Operator](https://github.com/coreos/prometheus-operator), you can automatically scrap metrics from [Cassandra exporter](https://github.com/criteo/cassandra_exporter) this way:
+
+```yaml
+# Prometheus scraping & alerting
+cassandraPrometheusScrap: true
+```
+
+## Alertmanager
+
+If you're using [Prometheus Operator](https://github.com/coreos/prometheus-operator), you can automatically have some default alerts through Alertmanager. You simply have to enable them this way:
+
+```yaml
+# Prometheus scraping & alerting
+cassandraAlertmanager:
+  alertsEnabled: true
+```
+
+And adapt alert labels to you configuration.
 
 # FAQ
 ## How to replace a Node?
