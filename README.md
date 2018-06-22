@@ -44,12 +44,12 @@ You can enable [Cassandra Reaper](http://cassandra-reaper.io) within your cluste
 ```yaml
 # Cassandra Reaper Client register
 cassandraReaperRegister:
-  enabled: true
+  enableReaperRegister: true
   reaperServerServiceName: cassandra-reaper.svc
 
 # Cassandra Reaper Server
 cassandraReaper:
-  enabled: true
+  enableReaper: true
 ```
 
 Then configure the other settings to make it work as you want.
@@ -64,7 +64,7 @@ by updating those lines:
 ```yaml
 # Cassandra Exporter
 cassandraExporter:
-  enabled: true
+  enableExporter: true
 ```
 
 Update as well other settings if you need.
@@ -77,8 +77,9 @@ you have to side the limits properly to avoid Kubernetes CrashloopBackoff becaus
 If you're using [Prometheus Operator](https://github.com/coreos/prometheus-operator), you can automatically scrap metrics from [Cassandra exporter](https://github.com/criteo/cassandra_exporter) this way:
 
 ```yaml
-# Prometheus scraping & alerting
-cassandraPrometheusScrap: true
+# Prometheus scraping
+cassandraPrometheusScrap:
+  enableScrap: true
 ```
 
 ## Alertmanager
@@ -86,9 +87,9 @@ cassandraPrometheusScrap: true
 If you're using [Prometheus Operator](https://github.com/coreos/prometheus-operator), you can automatically have some default alerts through Alertmanager. You simply have to enable them this way:
 
 ```yaml
-# Prometheus scraping & alerting
+# Alertmanager
 cassandraAlertmanager:
-  alertsEnabled: true
+  enableAlerts: true
 ```
 
 And adapt alert labels to you configuration.
