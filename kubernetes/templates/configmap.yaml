@@ -382,6 +382,7 @@ data:
         - org:apache:cassandra:metrics:streaming:.*
         - org:apache:cassandra:metrics:table:.*
         - org:apache:cassandra:metrics:threadpools:.*
+        - java:lang:.*
       # Refresh those metrics only every hour as it is costly for cassandra to retrieve them
       3600:
         - .*:snapshotssize:.*
