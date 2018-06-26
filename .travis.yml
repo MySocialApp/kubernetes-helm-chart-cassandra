@@ -1,22 +1,20 @@
 ---
-language: python
+language: go
+sudo: required
 
 env:
-  global:
-    - HELM_URL=https://storage.googleapis.com/kubernetes-helm
-    - HELM_TGZ=helm-v2.9.1-linux-amd64.tar.gz
+  - K8S_VERSION=1.9 HELM_VERSION=2.9.1 NUM_NODES=3 SKIP_SNAPSHOT=y PATH="$HOME/.kubeadm-dind-cluster:/tmp/linux-amd64:$PATH"
+  - K8S_VERSION=1.8 HELM_VERSION=2.9.1 NUM_NODES=3 SKIP_SNAPSHOT=y PATH="$HOME/.kubeadm-dind-cluster:/tmp/linux-amd64:$PATH"
 
 install:
-  # Installing Helm
-  - wget -q ${HELM_URL}/${HELM_TGZ}
-  - tar xzfv ${HELM_TGZ}
-  - PATH=`pwd`/linux-amd64/:$PATH
-  - helm init --client-only
+  - tests/k8s-euft/helm.sh local_install
+  - bats tests/k8s-euft/helm_lint.bats
+  - tests/k8s-euft/bootstrap_k8s.sh
+  - tests/k8s-euft/helm.sh install
 
 script:
-  # Rename Chart name to avoid linting error and enable all features
-  - >
-    sed -ri 's/^(name:)\s*\w+/\1 kubernetes/' kubernetes/Chart.yaml ;
-    sed -ri 's/(\s*enable\w+):\s*false/\1: true/g' kubernetes/values.yaml
-  # Check charts format
-  - helm lint kubernetes
+  - bats -t tests/states/deploy.bats
+  - bats -t tests/states/delete.bats
+
+after_script:
+  - tests/k8s-euft/clean_k8s.sh

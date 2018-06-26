@@ -9,7 +9,7 @@ cassandraMaxUnavailableNodes: 1
 
 # Cassandra settings
 cassandraImageName: "quay.io/mysocialapp/cassandra"
-cassandraImageVersion: "3.11.1-8"
+cassandraImageVersion: "3.11.1-9"
 cassandraDC: "DC1"
 cassandraConfig:
   concurrentWrites: 128
@@ -26,14 +26,12 @@ cassandraConfig:
   memtableCleanupThreshold: 0.2
   rowCacheSizeInMb: 128
   rowCacheSavePeriod: 14400
-cassandraJvmOptions: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:+AlwaysPreTouch"
-#cassandraResources:
-#  limits:
-#    cpu: 2
-#    memory: 4Gi
-#  requests:
-#    cpu: 2
-#    memory: 4Gi
+cassandraJvmOptions: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAMFraction=2"
+cassandraResources:
+  limits:
+    memory: 2400Mi
+  requests:
+    memory: 2400Mi
 
 # Backups
 cassandraBackup:

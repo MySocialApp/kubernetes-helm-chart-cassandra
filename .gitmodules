@@ -1,0 +1,3 @@
+[submodule "tests/k8s-euft"]
+	path = tests/k8s-euft
+	url = git@github.com:MySocialApp/k8s-euft.git

@@ -1,0 +1,17 @@
+Vagrant.configure("2") do |config|
+
+  config.vm.box = "deimos_fr/debian-stretch"
+  config.vm.synced_folder "..", "/vagrant_data"
+
+  config.vm.provider "virtualbox" do |vb|
+      vb.cpus = 4
+      vb.memory = "8096"
+  end
+
+  config.vm.provision "shell", inline: <<-SHELL
+    cd /vagrant_data
+    source tests/k8s-euft/env.bash
+    tests/k8s-euft/prerequisites.sh
+    go run tests/k8s-euft/travis-exec.go .travis.yml
+  SHELL
+end
