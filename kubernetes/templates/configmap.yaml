@@ -329,9 +329,9 @@ data:
 
     echo "[+] Restore finished"
   exporter_run_override.sh: |-
-    #!/bin/sh
+    #!/bin/bash
     cp -f /usr/local/apache-cassandra/scripts/exporter_config.yml /etc/cassandra_exporter/config.yml
-    /sbin/dumb-init /bin/bash /run.sh
+    /run.sh
   exporter_config.yml: |-
     host: localhost:7199
     ssl: False

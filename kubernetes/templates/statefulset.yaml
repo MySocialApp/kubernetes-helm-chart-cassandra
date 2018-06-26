@@ -131,7 +131,7 @@ spec:
         {{- if .Values.cassandraExporter.enableExporter }}
         - name: cassandra-exporter
           image: "criteord/cassandra_exporter:{{ .Values.cassandraExporter.imageVersion }}"
-          command: ['/bin/sh', '-c', '/usr/local/apache-cassandra/scripts/exporter_run_override.sh']
+          command: ['/sbin/dumb-init', '/bin/sh', '-c', '/usr/local/apache-cassandra/scripts/exporter_run_override.sh']
           env:
             - name: CASSANDRA_EXPORTER_CONFIG_host
               value: "{{ .Values.cassandraExporter.config.host }}"
