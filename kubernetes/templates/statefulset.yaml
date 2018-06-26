@@ -123,6 +123,8 @@ spec:
               name: jmx
             - containerPort: 9042
               name: cql
+          resources:
+{{ toYaml .Values.cassandraResources | indent 12 }}
           volumeMounts:
             - name: cassandra-data
               mountPath: /var/lib/cassandra

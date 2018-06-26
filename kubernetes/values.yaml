@@ -20,13 +20,20 @@ cassandraConfig:
   compactionThroughputMbPerSec: 150
   heapNewSize: 256M
   hintedHandoffThrottleInKb: 4096
-  maxHeap: 4G
   maxHintsDeliveryThreads: 4
   memtableAllocationType: "offheap_objects"
   memtableFlushWriter: 4
   memtableCleanupThreshold: 0.2
   rowCacheSizeInMb: 128
   rowCacheSavePeriod: 14400
+cassandraJvmOptions: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:+AlwaysPreTouch"
+#cassandraResources:
+#  limits:
+#    cpu: 2
+#    memory: 4Gi
+#  requests:
+#    cpu: 2
+#    memory: 4Gi
 
 # Backups
 cassandraBackup:
