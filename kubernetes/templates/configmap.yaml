@@ -14,10 +14,16 @@ data:
 
     export CLUSTER_DOMAIN=$(hostname -d | awk -F"." '{print $(NF-1),".",$NF}' | sed 's/ //g')
     export CASSANDRA_SEEDS={{ template "kubernetes.name" . }}-0.{{ template "kubernetes.name" . }}.{{ .Release.Namespace }}.svc.$CLUSTER_DOMAIN,{{ template "kubernetes.name" . }}-1.{{ template "kubernetes.name" . }}.{{ .Release.Namespace }}.svc.$CLUSTER_DOMAIN
+  jvm_options.sh: |-
+    #!/bin/bash
+
+    # Todo: avoid this and add manage it with run.sh
+    echo "JVM_OPTS=\"\$JVM_OPTS {{ .Values.cassandraJvmOptions }}\"" >> /etc/cassandra/cassandra-env.sh
   run_override.sh: |-
-    #/bin/sh
+    #!/bin/bash
 
     source /usr/local/apache-cassandra/scripts/envVars.sh
+    /usr/local/apache-cassandra/scripts/jvm_options.sh
 
     /run.sh
   postStart.sh: |-
