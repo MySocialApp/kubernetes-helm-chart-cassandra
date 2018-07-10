@@ -17,7 +17,9 @@ spec:
     metadata:
       labels:
         app: {{ template "kubernetes.name" . }}
-        deployedDate: "{{ .Release.cassandraDeployedDate }}"
+        chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+        release: {{ .Release.Name }}
+        heritage: {{ .Release.Service }}
     spec:
       nodeSelector:
         {{- range $key, $val := .Values.cassandraNodeSelector }}
