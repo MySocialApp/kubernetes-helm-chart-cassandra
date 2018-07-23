@@ -93,7 +93,7 @@ cassandraReaperRegister:
 cassandraReaper:
   enableReaper: false
   replicaCount: 1
-  imageVersion: 1.1.0
+  imageVersion: 1.2.1
   nodeSelector:
     node-role.kubernetes.io/node: "true"
   contactPoints: cassandra-0.cassandra
