@@ -42,8 +42,10 @@ spec:
           image: {{ .Values.cassandraImageName | default "quay.io/mysocialapp/cassandra" }}:{{ .Values.cassandraImageVersion }}
           command: ['/bin/sh', '-c', '/usr/local/apache-cassandra/scripts/run_override.sh']
           env:
+            {{ if not .Values.cassandraResources }}
             - name: MAX_HEAP_SIZE
               value: {{ .Values.cassandraConfig.maxHeap }}
+            {{ end }}
             - name: HEAP_NEWSIZE
               value: {{ .Values.cassandraConfig.heapNewSize }}
             - name: CASSANDRA_NUM_TOKENS
