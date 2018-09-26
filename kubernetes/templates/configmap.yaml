@@ -195,12 +195,23 @@ data:
     }
 
     function restore() {
+      echo "Enter the cluster domain of cassandra, hit enter if you're ok with: $CLUSTER_DOMAIN"
+      read clusterDomain
+      test "$clusterDomain" != "" && CLUSTER_DOMAIN=$clusterDomain
+      echo "Enter the cluster name of cassandra, hit enter if you're ok with: $CASSANDRA_CLUSTER_NAME"
+      read clusterName
+      test "$clusterName" != "" && CASSANDRA_CLUSTER_NAME=$clusterName
+      NODE_NAME=$(hostname)
+      echo "Enter the node name you want to restore, hit enter if you're ok with: $NODE_NAME"
+      read nodeName
+      test "$nodeName" != "" && NODE_NAME=$nodeName
+
       create_lock
 
       echo "[+] Running duplicity to restore from AWS"
-      duplicity {{ default "--archive-dir /var/lib/cassandra/.duplicity --allow-source-mismatch --s3-european-buckets --s3-use-new-style --copy-links --num-retries 3 --s3-use-multiprocessing --s3-multipart-chunk-size 100 --volsize 1024" .Values.cassandraBackup.duplicityOptions }} --time $RESTORE_TIME {{ .Values.cassandraBackup.awsDestinationPath }} {{ .Values.cassandraBackup.restoreFolder }} > /tmp/snapshot2s3.log 2>&1
+      duplicity --archive-dir /var/lib/cassandra/.duplicity --allow-source-mismatch --s3-european-buckets --s3-use-new-style --copy-links --num-retries 3 --s3-use-multiprocessing --s3-multipart-chunk-size 100 --volsize 1024 --time $RESTORE_TIME s3://s3-eu-west-1.amazonaws.com/${AWS_BUCKET}/$CLUSTER_DOMAIN/$CASSANDRA_CLUSTER_NAME/$NODE_NAME /var/lib/cassandra/restore > /tmp/snapshot2s3.log 2>&1
       if [ $? != 0 ] ; then
-        echo "Error while restoring $CLUSTER_DOMAIN/$CASSANDRA_CLUSTER_NAME/$(hostname)"
+        echo "Error while restoring $CLUSTER_DOMAIN/$CASSANDRA_CLUSTER_NAME/$NODE_NAME"
         alert_failure "Error with duplicity\n$(cat /tmp/snapshot2s3.log)"
       fi
       cat /tmp/snapshot2s3.log
