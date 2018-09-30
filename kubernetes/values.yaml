@@ -9,7 +9,7 @@ cassandraMaxUnavailableNodes: 1
 
 # Cassandra settings
 cassandraImageName: "quay.io/mysocialapp/cassandra"
-cassandraImageVersion: "3.11.1-9"
+cassandraImageVersion: "3.11.3"
 cassandraDC: "DC1"
 cassandraConfig:
   concurrentWrites: 128
@@ -50,7 +50,7 @@ cassandraBackup:
 cassandraExporter:
   enableExporter: false
   replicaCount: 1
-  imageVersion: 1.0.2
+  imageVersion: 2.0.2
   nodeSelector:
     node-role.kubernetes.io/node: "true"
   resources:
@@ -93,7 +93,7 @@ cassandraReaperRegister:
 cassandraReaper:
   enableReaper: false
   replicaCount: 1
-  imageVersion: 1.2.1
+  imageVersion: 1.2.2
   nodeSelector:
     node-role.kubernetes.io/node: "true"
   contactPoints: cassandra-0.cassandra
