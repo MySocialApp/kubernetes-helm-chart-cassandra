@@ -15,7 +15,6 @@ spec:
     type: RollingUpdate
     rollingUpdate:
       maxSurge: 1
-      maxUnavailable: 50%
   template:
     metadata:
       labels:
@@ -25,6 +24,21 @@ spec:
         {{- range $key, $val := .Values.cassandraReaper.nodeSelector }}
         {{ $key }}: {{ $val | quote }}
         {{- end}}
+      initContainers:
+      - name: cassandra-reaper-bootstrap
+        image: "quay.io/mysocialapp/docker-backup-common:{{ .Values.cassandraBackup.backupImageVersion }}"
+        args:
+          - /bin/bash
+          - -c
+          - kubectl -n {{ .Release.Namespace }} exec cassandra-0 /usr/local/apache-cassandra/scripts/reaper_ks_bootstrap.sh
+        volumeMounts:
+        - name: {{ template "kubernetes.name" . }}
+          mountPath: /usr/local/apache-cassandra/scripts
+      volumes:
+        - name: {{ template "kubernetes.name" . }}
+          configMap:
+            name: {{ template "kubernetes.name" . }}
+            defaultMode: 0775
       containers:
       - name: cassandra-reaper
         image: "thelastpickle/cassandra-reaper:{{ .Values.cassandraReaper.imageVersion }}"

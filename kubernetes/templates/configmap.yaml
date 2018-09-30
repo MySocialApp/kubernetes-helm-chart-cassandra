@@ -405,3 +405,9 @@ data:
         - .*:snapshotssize:.*
         - .*:estimated.*
         - .*:totaldiskspaceused:.*
+  reaper_ks_bootstrap.sh: |-
+    #!/bin/bash
+    echo "Create keyspace if it does not exist"
+    if [ $(cqlsh -e 'DESC KEYSPACES' | grep -c reaper_db) == 0 ] ; then
+        cqlsh -e "CREATE KEYSPACE reaper_db WITH replication = {'class': 'NetworkTopologyStrategy', '{{ .Values.cassandraDC }}': 3};"
+    fi
