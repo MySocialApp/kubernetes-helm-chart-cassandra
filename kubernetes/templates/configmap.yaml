@@ -221,12 +221,17 @@ data:
       release_lock
     }
 
+    function clean_old() {
+      # Remove backups older than 3 months
+      duplicity remove-older-than {{ default "3M" .Values.cassandraBackup.removeOlderThan }} --force {{ .Values.cassandraBackup.awsDestinationPath }}
+    }
+
     function list() {
       duplicity {{ default "--archive-dir /var/lib/cassandra/.duplicity --allow-source-mismatch --s3-european-buckets --s3-use-new-style --copy-links --num-retries 3 --s3-use-multiprocessing --s3-multipart-chunk-size 100 --volsize 1024" .Values.cassandraBackup.duplicityOptions }} collection-status {{ .Values.cassandraBackup.awsDestinationPath }}
     }
 
     function help() {
-      echo "Usage: $0 [backup|restore|list] AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_PASSPHRASE AWS_BUCKET [RESTORE_TIME]"
+      echo "Usage: $0 [backup|restore|list|clean_old] AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_PASSPHRASE AWS_BUCKET [RESTORE_TIME]"
       exit 1
     }
 
@@ -245,6 +250,8 @@ data:
     elif [ $1 == "restore" ] ; then
       test "$#" -ne 6 && help
       restore
+    elif [ $1 == "clean_old" ] ; then
+      clean_old
     elif [ $1 == "list" ] ; then
       list
     else

@@ -25,15 +25,26 @@ spec:
             - /bin/bash
             - -c
             - |
+              function wait_for_jobs_done() {
+                while [ $(jobs | wc -l) != 0 ] ; do
+                  echo "Waiting 5 sec until jobs are finished"
+                  sleep 5
+                done
+              }
+
               for instance in $(kubectl -n {{ .Release.Namespace }} get pod -l app={{ template "kubernetes.name" . }} | awk '{ print $1 }' | grep -v "^NAME") ; do
                 echo "Launching backup Cassandra: $instance"
                 kubectl -n {{ .Release.Namespace }} exec ${instance} /usr/local/apache-cassandra/scripts/snapshot2s3.sh backup "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY" "$PASSPHRASE" "$AWS_BUCKET" &
               done
 
-              while [ $(jobs | wc -l) != 0 ] ; do
-                echo "Waiting 5 sec until jobs are finished"
-                sleep 5
+              wait_for_jobs_done
+
+              for instance in $(kubectl -n {{ .Release.Namespace }} get pod -l app={{ template "kubernetes.name" . }} | awk '{ print $1 }' | grep -v "^NAME") ; do
+                echo "Cleaning old backups: $instance"
+                kubectl -n {{ .Release.Namespace }} exec ${instance} /usr/local/apache-cassandra/scripts/snapshot2s3.sh clean_old "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY" "$PASSPHRASE" "$AWS_BUCKET" &
               done
+
+              wait_for_jobs_done
             env:
               - name: AWS_ACCESS_KEY_ID
                 valueFrom:
