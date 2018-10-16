@@ -70,7 +70,7 @@ spec:
         livenessProbe:
           tcpSocket:
             port: {{ .Values.cassandraReaper.envVariables.REAPER_SERVER_APP_PORT }}
-          initialDelaySeconds: 180
+          initialDelaySeconds: 300
           periodSeconds: 10
         readinessProbe:
           httpGet:
