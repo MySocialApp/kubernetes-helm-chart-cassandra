@@ -1,0 +1,27 @@
+{{- if .Values.casspoke.enablePoke }}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: casspoke
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: casspoke
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  config.yml: |-
+    app:
+      measurementPeriodInSec: 10
+      refreshDiscoveryPeriodInSec: 60
+      httpServerPort: {{ .Values.casspoke.config.httpServerPort }}
+
+    discovery:
+      staticDns:
+        clustername: {{ .Values.casspoke.config.clustername }}
+        host: {{ .Values.casspoke.config.host }}
+
+    service:
+      type: CassandraRunner
+      timeoutInSec: 60
+{{- end }}

@@ -35,3 +35,7 @@ load common
 @test "Check all Cassandra nodes are Up and Normal" {
     num_nodes_eq_nodetool_status_un
 }
+
+@test "Upgrade test" {
+    helm upgrade kubernetes -n cassandra
+}

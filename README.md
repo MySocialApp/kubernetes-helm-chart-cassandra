@@ -2,7 +2,7 @@
 
 You can find here a helm chart we're using at [MySocialApp](https://mysocialapp.io)
 
-This is a Kubernetes Helm Chart for Cassandra.
+This is a Kubernetes Helm Chart for Cassandra with several useful monitoring and management tools.
 
 ## Backups
 
@@ -93,6 +93,18 @@ cassandraAlertmanager:
 ```
 
 And adapt alert labels to you configuration.
+
+## Casspoke
+
+[Casspoke](https://github.com/criteo/casspoke) is a latency probe checker for Cassandra. To enable it:
+
+```yaml
+# Casspoke
+casspoke:
+  enablePoke: true
+```
+
+Update as well other settings if you need.
 
 # FAQ
 ## How to replace a Node?

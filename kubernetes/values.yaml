@@ -66,6 +66,27 @@ cassandraExporter:
     listenPort: 8080
     jvmOpts: ""
 
+# Casspoke
+casspoke:
+  enablePoke: false
+  imageVersion: 1.2
+  replicaCount: 3
+  nodeSelector:
+    node-role.kubernetes.io/node: "true"
+  config:
+    httpServerPort: 8080
+    clustername: cassandra
+    host: cassandra-0.cassandra:9042,cassandra-1.cassandra:9042,cassandra-2.cassandra:9042
+  envVariables:
+    JVM_OPTS: "-XX:+UnlockExperimentalVMOptions -XX:MaxRAMFraction=2 -XX:+AlwaysPreTouch"
+  resources:
+    limits:
+      cpu: 300m
+      memory: 500Mi
+    requests:
+      cpu: 300m
+      memory: 500Mi
+
 # Prometheus scraping
 cassandraPrometheusScrap:
   enableScrap: false

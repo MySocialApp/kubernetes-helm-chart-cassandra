@@ -1,0 +1,21 @@
+{{- if .Values.casspoke.enablePoke }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: casspoke
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: casspoke
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  clusterIP: None
+  ports:
+    - name: metrics
+      port: 80
+      targetPort: {{ .Values.casspoke.config.httpServerPort }}
+      protocol: TCP
+  selector:
+    app: casspoke
+{{- end }}

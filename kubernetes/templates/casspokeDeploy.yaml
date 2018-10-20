@@ -1,0 +1,51 @@
+{{- if .Values.casspoke.enablePoke }}
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: casspoke
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: casspoke
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.casspoke.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: casspoke
+    spec:
+      nodeSelector:
+        {{- range $key, $val := .Values.casspoke.nodeSelector }}
+        {{ $key }}: {{ $val | quote }}
+        {{- end}}
+      containers:
+      - name: casspoke
+        image: "quay.io/deimosfr/casspoke:{{ .Values.casspoke.imageVersion }}"
+        env:
+        - name: JVM_OPTS
+          value: {{ .Values.casspoke.envVariables.JVM_OPTS }}
+        ports:
+        - name: metrics
+          containerPort: {{ .Values.casspoke.config.httpServerPort }}
+          protocol: TCP
+        livenessProbe:
+          tcpSocket:
+            port: {{ .Values.casspoke.config.httpServerPort }}
+          initialDelaySeconds: 60
+          periodSeconds: 10
+        resources:
+{{ toYaml .Values.casspoke.resources | indent 10 }}
+        volumeMounts:
+          - name: casspoke
+            mountPath: /etc/casspoke
+      volumes:
+        - name: casspoke
+          configMap:
+            name: casspoke
+{{- end }}
