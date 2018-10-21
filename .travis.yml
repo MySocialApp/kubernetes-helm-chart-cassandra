@@ -12,8 +12,14 @@ install:
   - tests/k8s-euft/helm.sh install
 
 script:
+  # Test current version
   - bats -t tests/states/deploy.bats
   - bats -t tests/states/delete.bats
+  # Test upgrade from previous to current
+  - git checkout HEAD~
+  - bats -t tests/states/deploy.bats
+  - git checkout master
+  - bats -t tests/states/deploy.bats
 
 after_script:
   - tests/k8s-euft/clean_k8s.sh
