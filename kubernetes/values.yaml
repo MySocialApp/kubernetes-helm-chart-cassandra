@@ -27,11 +27,11 @@ cassandraConfig:
   rowCacheSizeInMb: 128
   rowCacheSavePeriod: 14400
 cassandraJvmOptions: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAMFraction=2"
-cassandraResources:
-  limits:
-    memory: 2400Mi
-  requests:
-    memory: 2400Mi
+cassandraResources: {}
+#  limits:
+#    memory: 2400Mi
+#  requests:
+#    memory: 2400Mi
 
 # Backups
 cassandraBackup:
