@@ -26,7 +26,7 @@ spec:
         {{- end}}
       containers:
       - name: casspoke
-        image: "quay.io/deimosfr/casspoke:{{ .Values.casspoke.imageVersion }}"
+        image: "criteord/casspoke:{{ .Values.casspoke.imageVersion }}"
         env:
         - name: JVM_OPTS
           value: {{ .Values.casspoke.envVariables.JVM_OPTS }}
