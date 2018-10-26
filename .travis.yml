@@ -19,7 +19,7 @@ script:
   - git checkout HEAD~
   - bats -t tests/states/deploy.bats
   - git checkout master
-  - bats -t tests/states/deploy.bats
+  - bats -t tests/states/upgrade.bats
 
 after_script:
   - tests/k8s-euft/clean_k8s.sh
