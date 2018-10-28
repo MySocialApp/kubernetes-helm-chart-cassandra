@@ -105,6 +105,9 @@ cassandraAlertmanager:
       severity: page
       team: infra
       type: functional
+  alertRules:
+    cassPokeWarn: 3e+8
+    cassPokeCrit: 1e+10
 
 # Cassandra Reaper Client register
 cassandraReaperRegister:

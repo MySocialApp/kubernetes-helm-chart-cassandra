@@ -12,6 +12,6 @@ metadata:
     release: {{ .Release.Name }}
     role: alert-rules
 data:
-  elasticsearch.rules: |-
+  cassandra.rules: |-
     {{- include "cassandra.rules.yaml.tpl" . | indent 4}}
 {{ end }}

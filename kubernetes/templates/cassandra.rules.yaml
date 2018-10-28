@@ -77,21 +77,25 @@ groups:
       summary: "Cassandra exporter reports too many timeouts: {{`{{$value}}`}}%. You have too many network troubles."
 
 {{- if .Values.casspoke.enablePoke }}
+{{- if .Values.cassandraAlertmanager.alertRules.cassPokeWarn }}
   - alert: Casspoke_Latencies_099_Warning
-    expr: max(cassandra_latency{namespace="{{ .Release.Namespace }}",quantile="0.99"}) > 3e+8
+    expr: max(cassandra_latency{namespace="{{ .Release.Namespace }}",quantile="0.99"}) > {{ .Values.cassandraAlertmanager.alertRules.cassPokeWarn }}
     for: 10m
     labels:
 {{ toYaml .Values.cassandraAlertmanager.alertLabels.sloPage | indent 6 }}
     annotations:
-      description: "Cassandra probe max latencies at 99 percentile is > 300ms for more than 10 min"
+      description: "Cassandra probe max latencies at 99 percentile is > {{ .Values.cassandraAlertmanager.alertRules.cassPokeWarn }} for more than 10 min"
       summary: "Warning current max latency seen: {{`{{$value}}`}}%"
+{{- end }}
+{{- if .Values.cassandraAlertmanager.alertRules.cassPokeCrit }}
   - alert: Casspoke_Latencies_099_Critical
-    expr: max(cassandra_latency{namespace="{{ .Release.Namespace }}",quantile="0.99"}) > 1e+10
+    expr: max(cassandra_latency{namespace="{{ .Release.Namespace }}",quantile="0.99"}) > {{ .Values.cassandraAlertmanager.alertRules.cassPokeCrit }}
     for: 5m
     labels:
 {{ toYaml .Values.cassandraAlertmanager.alertLabels.slaPage | indent 6 }}
     annotations:
-      description: "Cassandra probe max latencies at 99 percentile is > 1s for more than 5 min"
+      description: "Cassandra probe max latencies at 99 percentile is > {{ .Values.cassandraAlertmanager.alertRules.cassPokeCrit }} for more than 5 min"
       summary: "Critical current max latency seen: {{`{{$value}}`}}%"
 {{- end }}
+{{ end }}
 {{ end }}
