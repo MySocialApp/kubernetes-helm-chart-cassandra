@@ -79,13 +79,13 @@ casspoke:
     host: cassandra-0.cassandra:9042,cassandra-1.cassandra:9042,cassandra-2.cassandra:9042
   envVariables:
     JVM_OPTS: "-XX:+UnlockExperimentalVMOptions -XX:MaxRAMFraction=2 -XX:+AlwaysPreTouch"
-  resources:
-    limits:
-      cpu: 300m
-      memory: 500Mi
-    requests:
-      cpu: 300m
-      memory: 500Mi
+  resources: {}
+#    limits:
+#      cpu: 300m
+#      memory: 500Mi
+#    requests:
+#      cpu: 300m
+#      memory: 500Mi
 
 # Prometheus scraping
 cassandraPrometheusScrap:
@@ -142,10 +142,10 @@ cassandraReaper:
     REAPER_SERVER_ADMIN_PORT: 8081
     REAPER_SERVER_APP_PORT: 8080
     REAPER_METRICS_ENABLED: true
-  resources:
-    limits:
-      cpu: 500m
-      memory: 500Mi
-    requests:
-      cpu: 500m
-      memory: 500Mi
+  resources: {}
+#    limits:
+#      cpu: 500m
+#      memory: 500Mi
+#    requests:
+#      cpu: 500m
+#      memory: 500Mi
