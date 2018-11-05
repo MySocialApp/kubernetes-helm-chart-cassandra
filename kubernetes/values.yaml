@@ -69,7 +69,7 @@ cassandraExporter:
 # Casspoke
 casspoke:
   enablePoke: false
-  imageVersion: 1.1
+  imageVersion: 1.2
   replicaCount: 3
   nodeSelector:
     node-role.kubernetes.io/node: "true"
