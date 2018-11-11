@@ -8,48 +8,48 @@ groups:
     labels:
 {{ toYaml .Values.cassandraAlertmanager.alertLabels.sloInterrupt | indent 6 }}
     annotations:
-      description: "There is one instance down on Cassandra cluster."
       summary: "There is one instance down on Cassandra cluster."
+      description: "There is one instance down on Cassandra cluster."
   - alert: Cassandra_Two_Or_More_Nodes_Lost
     expr: kube_statefulset_replicas{namespace="{{ .Release.Namespace }}",statefulset="cassandra"} - kube_statefulset_status_replicas{namespace="{{ .Release.Namespace }}",statefulset="cassandra"} > 1
     for: 2m
     labels:
 {{ toYaml .Values.cassandraAlertmanager.alertLabels.sloPage | indent 6 }}
     annotations:
-      description: "There is two or more nodes down on Cassandra cluster."
       summary: "There is two or more nodes down on Cassandra cluster."
+      description: "There is two or more nodes down on Cassandra cluster."
   - alert: Cassandra_Pod_Memory_Warning
     expr: max(container_memory_usage_bytes{namespace="{{ .Release.Namespace }}",pod_name=~"cassandra-\\d+", container_name="cassandra"}) by (container_name) / min(kube_pod_container_resource_limits_memory_bytes{namespace="{{ .Release.Namespace }}", container="cassandra"}) by (container) * 100 > 65
     for: 1m
     labels:
 {{ toYaml .Values.cassandraAlertmanager.alertLabels.sloInterrupt | indent 6 }}
     annotations:
-      description: "Cassandra memory limit warning."
-      summary: "Cassandra memory reached {{`{{$value}}`}}%. You need to upgrade its memory to avoid Cassandra pod issues."
+      summary: "Cassandra memory limit warning."
+      description: "Cassandra memory reached {{`{{$value}}`}}%. You need to upgrade its memory to avoid Cassandra pod issues."
   - alert: Cassandra_Pod_Memory_Critical
     expr: max(container_memory_usage_bytes{namespace="{{ .Release.Namespace }}",pod_name=~"cassandra-\\d+", container_name=~"cassandra"}) by (container_name) / min(kube_pod_container_resource_limits_memory_bytes{namespace="{{ .Release.Namespace }}", container="cassandra"}) by (container) * 100 > 80
     for: 1m
     labels:
 {{ toYaml .Values.cassandraAlertmanager.alertLabels.sloPage | indent 6 }}
     annotations:
-      description: "Cassandra memory limit critical."
-      summary: "Cassandra memory reached {{`{{$value}}`}}%. You need to upgrade its memory as soon as possible to avoid Cassandra OOM."
+      summary: "Cassandra memory limit critical."
+      description: "Cassandra memory reached {{`{{$value}}`}}%. You need to upgrade its memory as soon as possible to avoid Cassandra OOM."
   - alert: Cassandra_JMX_Memory_Warning
     expr: max(cassandra_stats{cluster="{{ .Release.Namespace }}",datacenter="{{ .Values.cassandraDC }}",name="java:lang:memory:heapmemoryusage:used"}) by (container_name) / max(cassandra_stats{cluster="{{ .Release.Namespace }}",datacenter="{{ .Values.cassandraDC }}",name="java:lang:memory:heapmemoryusage:committed"}) by (container_name) * 100 > 75
     for: 5m
     labels:
 {{ toYaml .Values.cassandraAlertmanager.alertLabels.sloInterrupt | indent 6 }}
     annotations:
-      description: "Cassandra JMX memory usage warning."
-      summary: "Cassandra JMX memory reached {{`{{$value}}`}}%. You need to upgrade its memory to avoid Cassandra pod issues."
+      summary: "Cassandra JMX memory usage warning."
+      description: "Cassandra JMX memory reached {{`{{$value}}`}}%. You need to upgrade its memory to avoid Cassandra pod issues."
   - alert: Cassandra_JMX_Memory_Critical
     expr: max(cassandra_stats{cluster="{{ .Release.Namespace }}",datacenter="{{ .Values.cassandraDC }}",name="java:lang:memory:heapmemoryusage:used"}) by (container_name) / max(cassandra_stats{cluster="{{ .Release.Namespace }}",datacenter="{{ .Values.cassandraDC }}",name="java:lang:memory:heapmemoryusage:committed"}) by (container_name) * 100 > 90
     for: 5m
     labels:
 {{ toYaml .Values.cassandraAlertmanager.alertLabels.sloPage | indent 6 }}
     annotations:
-      description: "Cassandra JMX memory usage critical."
-      summary: "Cassandra JMX memory reached {{`{{$value}}`}}%. You need to upgrade its memory as soon as possible to avoid Cassandra OOM."
+      summary: "Cassandra JMX memory usage critical."
+      description: "Cassandra JMX memory reached {{`{{$value}}`}}%. You need to upgrade its memory as soon as possible to avoid Cassandra OOM."
 
   - alert: Cassandra_Exporter_Memory_Warning
     expr: max(container_memory_usage_bytes{namespace="{{ .Release.Namespace }}",pod_name=~"cassandra-\\d+", container_name="cassandra-exporter"}) by (container_name) / min(kube_pod_container_resource_limits_memory_bytes{namespace="{{ .Release.Namespace }}", container="cassandra-exporter"}) by (container) * 100 > 65
@@ -57,24 +57,24 @@ groups:
     labels:
 {{ toYaml .Values.cassandraAlertmanager.alertLabels.sloInterrupt | indent 6 }}
     annotations:
-      description: "Cassandra exporter memory limit warning."
-      summary: "Cassandra exporter memory reached {{`{{$value}}`}}%. You need to upgrade its memory to avoid Cassandra pod issues."
+      summary: "Cassandra exporter memory limit warning."
+      description: "Cassandra exporter memory reached {{`{{$value}}`}}%. You need to upgrade its memory to avoid Cassandra pod issues."
   - alert: Cassandra_Exporter_Memory_Critical
     expr: max(container_memory_usage_bytes{namespace="{{ .Release.Namespace }}",pod_name=~"cassandra-\\d+", container_name="cassandra-exporter"}) by (container_name) / min(kube_pod_container_resource_limits_memory_bytes{namespace="{{ .Release.Namespace }}", container="cassandra-exporter"}) by (container) * 100 > 80
     for: 1m
     labels:
 {{ toYaml .Values.cassandraAlertmanager.alertLabels.sloPage | indent 6 }}
     annotations:
-      description: "Cassandra exporter memory limit critical."
-      summary: "Cassandra exporter memory reached {{`{{$value}}`}}%. You need to upgrade its memory as soon as possible to avoid Cassandra pod issues."
+      summary: "Cassandra exporter memory limit critical."
+      description: "Cassandra exporter memory reached {{`{{$value}}`}}%. You need to upgrade its memory as soon as possible to avoid Cassandra pod issues."
   - alert: Cassandra_Exporter_Timeout
     expr: sum(cassandra_stats{cluster="{{ .Release.Namespace }}",datacenter="{{ .Values.cassandraDC }}",name="org:apache:cassandra:metrics:connection:totaltimeouts:oneminuterate"}) by (name) > 0.1
     for: 10m
     labels:
 {{ toYaml .Values.cassandraAlertmanager.alertLabels.sloPage | indent 6 }}
     annotations:
-      description: "Cassandra exporter too many timeouts."
-      summary: "Cassandra exporter reports too many timeouts: {{`{{$value}}`}}%. You have too many network troubles."
+      summary: "Cassandra exporter too many timeouts."
+      description: "Cassandra exporter reports too many timeouts on {{ .Release.Namespace }}: {{`{{$value}}`}}%. You have too many network troubles."
 
 {{- if .Values.casspoke.enablePoke }}
 {{- if .Values.cassandraAlertmanager.alertRules.cassPokeWarn }}
@@ -84,8 +84,8 @@ groups:
     labels:
 {{ toYaml .Values.cassandraAlertmanager.alertLabels.sloPage | indent 6 }}
     annotations:
-      description: "Cassandra probe max latencies at 99 percentile is > {{ .Values.cassandraAlertmanager.alertRules.cassPokeWarn }} for more than 10 min"
       summary: "Warning current max latency seen: {{`{{$value}}`}}%"
+      description: "Cassandra probe max latencies at 99 percentile is > {{ .Values.cassandraAlertmanager.alertRules.cassPokeWarn }} for more than 10 min on {{ .Release.Namespace }}"
 {{- end }}
 {{- if .Values.cassandraAlertmanager.alertRules.cassPokeCrit }}
   - alert: Casspoke_Latencies_099_Critical
@@ -94,8 +94,8 @@ groups:
     labels:
 {{ toYaml .Values.cassandraAlertmanager.alertLabels.slaPage | indent 6 }}
     annotations:
-      description: "Cassandra probe max latencies at 99 percentile is > {{ .Values.cassandraAlertmanager.alertRules.cassPokeCrit }} for more than 5 min"
       summary: "Critical current max latency seen: {{`{{$value}}`}}%"
+      description: "Cassandra probe max latencies at 99 percentile is > {{ .Values.cassandraAlertmanager.alertRules.cassPokeCrit }} for more than 5 min on {{ .Release.Namespace }}"
 {{- end }}
 {{ end }}
 {{ end }}
