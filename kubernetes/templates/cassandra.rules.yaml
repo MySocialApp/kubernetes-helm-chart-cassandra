@@ -51,6 +51,22 @@ groups:
       summary: "Cassandra JMX memory usage critical."
       description: "Cassandra JMX memory reached {{`{{$value}}`}}%. You need to upgrade its memory as soon as possible to avoid Cassandra OOM."
 
+  - alert: Cassandra_Exporter_JVM_Usage_Warning
+    expr: (sum(cassandra_stats{datacenter="{{ .Values.cassandraDC }}", cluster="{{ .Values.cassandraDC }}",name=~"java:lang:memory:.+:used"}) / sum(cassandra_stats{datacenter="{{ .Values.cassandraDC }}", cluster="{{ .Values.cassandraDC }}",name=~"java:lang:memory:.+:max"})) * 100 > 80
+    for: 15m
+    labels:
+{{ toYaml .Values.cassandraAlertmanager.alertLabels.sloInterrupt | indent 6 }}
+    annotations:
+      summary: "Cassandra exporter JVM warning usage."
+      description: "Cassandra exporter JVM percentage usage {{`{{$value}}`}}%. You need to upgrade its memory."
+  - alert: Cassandra_Exporter_JVM_Usage_Critical
+    expr: (sum(cassandra_stats{datacenter="{{ .Values.cassandraDC }}", cluster="{{ .Values.cassandraDC }}",name=~"java:lang:memory:.+:used"}) / sum(cassandra_stats{datacenter="{{ .Values.cassandraDC }}", cluster="{{ .Values.cassandraDC }}",name=~"java:lang:memory:.+:max"})) * 100 > 90
+    for: 20m
+    labels:
+{{ toYaml .Values.cassandraAlertmanager.alertLabels.sloPage | indent 6 }}
+    annotations:
+      summary: "Cassandra exporter JVM critical usage."
+      description: "Cassandra exporter JVM percentage usage {{`{{$value}}`}}%. You need to upgrade its memory as soon as possible."
   - alert: Cassandra_Exporter_Memory_Warning
     expr: max(container_memory_usage_bytes{namespace="{{ .Release.Namespace }}",pod_name=~"cassandra-\\d+", container_name="cassandra-exporter"}) by (container_name) / min(kube_pod_container_resource_limits_memory_bytes{namespace="{{ .Release.Namespace }}", container="cassandra-exporter"}) by (container) * 100 > 65
     for: 1m
