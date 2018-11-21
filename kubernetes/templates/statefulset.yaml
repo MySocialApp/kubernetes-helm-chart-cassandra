@@ -142,7 +142,7 @@ spec:
               value: "{{ .Values.cassandraExporter.config.listenPort }}"
             - name: JVM_OPTS
               value: "{{ .Values.cassandraExporter.config.jvmOpts }}
-                      -XX:MaxRAMFraction=1
+                      -XX:MaxRAMFraction=2
                       -XX:+AlwaysPreTouch
                       -Dorg.slf4j.simpleLogger.showDateTime=true
                       -Dorg.slf4j.simpleLogger.dateTimeFormat=\"yyyy-MM-dd'T'HH:mm:ss\"
