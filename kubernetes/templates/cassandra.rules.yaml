@@ -52,7 +52,7 @@ groups:
       description: "Cassandra JMX memory reached {{`{{$value}}`}}%. You need to upgrade its memory as soon as possible to avoid Cassandra OOM."
 
   - alert: Cassandra_Exporter_JVM_Usage_Warning
-    expr: (sum(cassandra_stats{datacenter="{{ .Values.cassandraDC }}", cluster="{{ .Values.cassandraDC }}",name=~"java:lang:memory:.+:used"}) / sum(cassandra_stats{datacenter="{{ .Values.cassandraDC }}", cluster="{{ .Values.cassandraDC }}",name=~"java:lang:memory:.+:max"})) * 100 > 80
+    expr: (sum(cassandra_stats{cluster="{{ .Release.Namespace }}",datacenter="{{ .Values.cassandraDC }}",name=~"java:lang:memory:.+:used"}) / sum(cassandra_stats{cluster="{{ .Release.Namespace }}",datacenter="{{ .Values.cassandraDC }}",name=~"java:lang:memory:.+:max"})) * 100 > 80
     for: 15m
     labels:
 {{ toYaml .Values.cassandraAlertmanager.alertLabels.sloInterrupt | indent 6 }}
@@ -60,7 +60,7 @@ groups:
       summary: "Cassandra exporter JVM warning usage."
       description: "Cassandra exporter JVM percentage usage {{`{{$value}}`}}%. You need to upgrade its memory."
   - alert: Cassandra_Exporter_JVM_Usage_Critical
-    expr: (sum(cassandra_stats{datacenter="{{ .Values.cassandraDC }}", cluster="{{ .Values.cassandraDC }}",name=~"java:lang:memory:.+:used"}) / sum(cassandra_stats{datacenter="{{ .Values.cassandraDC }}", cluster="{{ .Values.cassandraDC }}",name=~"java:lang:memory:.+:max"})) * 100 > 90
+    expr: (sum(cassandra_stats{cluster="{{ .Release.Namespace }}",datacenter="{{ .Values.cassandraDC }}",name=~"java:lang:memory:.+:used"}) / sum(cassandra_stats{cluster="{{ .Release.Namespace }}",datacenter="{{ .Values.cassandraDC }}",name=~"java:lang:memory:.+:max"})) * 100 > 90
     for: 20m
     labels:
 {{ toYaml .Values.cassandraAlertmanager.alertLabels.sloPage | indent 6 }}

@@ -2,13 +2,13 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "kubernetes.name" . }}-alerts
-  namespace: {{ .Release.Namespace }}
+  name: {{ template "kubernetes.name" . }}-{{ .Release.Namespace }}-alerts
+  namespace: observability
   labels:
     app: {{ template "kubernetes.name" . }}-alerts
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     heritage: {{ .Release.Service }}
-    prometheus: {{ .Release.Namespace }}
+    prometheus: observability
     release: {{ .Release.Name }}
     role: alert-rules
 data:
