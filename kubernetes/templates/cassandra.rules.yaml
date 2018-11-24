@@ -35,8 +35,8 @@ groups:
       summary: "Cassandra memory limit critical."
       description: "Cassandra memory reached {{`{{$value}}`}}% on {{ .Release.Namespace }}. You need to upgrade its memory as soon as possible to avoid Cassandra OOM."
   - alert: Cassandra_JMX_Memory_Warning
-    expr: max(cassandra_stats{cluster="{{ .Release.Namespace }}",datacenter="{{ .Values.cassandraDC }}",name="java:lang:memory:heapmemoryusage:used"}) by (container_name) / max(cassandra_stats{cluster="{{ .Release.Namespace }}",datacenter="{{ .Values.cassandraDC }}",name="java:lang:memory:heapmemoryusage:committed"}) by (container_name) * 100 > 75
-    for: 5m
+    expr: max(cassandra_stats{cluster="{{ .Release.Namespace }}",datacenter="{{ .Values.cassandraDC }}",name="java:lang:memory:heapmemoryusage:used"}) by (container_name) / max(cassandra_stats{cluster="{{ .Release.Namespace }}",datacenter="{{ .Values.cassandraDC }}",name="java:lang:memory:heapmemoryusage:committed"}) by (container_name) * 100 > 85
+    for: 10m
     labels:
 {{ toYaml .Values.cassandraAlertmanager.alertLabels.sloInterrupt | indent 6 }}
     annotations:
@@ -44,7 +44,7 @@ groups:
       description: "Cassandra JMX memory reached {{`{{$value}}`}}% on {{ .Release.Namespace }}. You need to upgrade its memory to avoid Cassandra pod issues."
   - alert: Cassandra_JMX_Memory_Critical
     expr: max(cassandra_stats{cluster="{{ .Release.Namespace }}",datacenter="{{ .Values.cassandraDC }}",name="java:lang:memory:heapmemoryusage:used"}) by (container_name) / max(cassandra_stats{cluster="{{ .Release.Namespace }}",datacenter="{{ .Values.cassandraDC }}",name="java:lang:memory:heapmemoryusage:committed"}) by (container_name) * 100 > 90
-    for: 5m
+    for: 10m
     labels:
 {{ toYaml .Values.cassandraAlertmanager.alertLabels.sloPage | indent 6 }}
     annotations:
