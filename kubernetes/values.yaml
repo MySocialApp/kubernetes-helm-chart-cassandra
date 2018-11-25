@@ -9,7 +9,7 @@ cassandraMaxUnavailableNodes: 1
 
 # Cassandra settings
 cassandraImageName: "quay.io/mysocialapp/cassandra"
-cassandraImageVersion: "3.11.3-0"
+cassandraImageVersion: "3.11.3-1"
 cassandraDC: "DC1"
 cassandraConfig:
   concurrentWrites: 128
