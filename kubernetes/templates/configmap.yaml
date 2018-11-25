@@ -28,7 +28,13 @@ data:
     /run.sh
   postStart.sh: |-
     #!/bin/bash
+
     source /usr/local/apache-cassandra/scripts/envVars.sh
+
+    echo "Wait 9042 port to be open"
+    while [ $(ss -lnt | grep -c 9042) != 1 ] ; do
+      sleep 5
+    done
 
     until /ready-probe.sh ; do
       echo "Waiting node to be ready"
