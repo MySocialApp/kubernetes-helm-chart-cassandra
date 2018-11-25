@@ -160,11 +160,12 @@ spec:
           livenessProbe:
             tcpSocket:
               port: {{ .Values.cassandraExporter.config.listenPort }}
+            initialDelaySeconds: 180
           readinessProbe:
             httpGet:
               path: /metrics
               port: {{ .Values.cassandraExporter.config.listenPort }}
-            initialDelaySeconds: 20
+            initialDelaySeconds: 180
             timeoutSeconds: 45
           resources:
 {{ toYaml .Values.cassandraExporter.resources | indent 12 }}
