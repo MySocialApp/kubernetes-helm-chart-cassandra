@@ -132,13 +132,12 @@ UN  10.233.68.55    16.39 MiB  256          48.5%             e319c1c2-0b00-4377
 To replace the dead node, edit configmap directly and add this line before run.sh:
 ```
 run_override.sh: |-
-  #/bin/sh
-
-  export CLUSTER_DOMAIN=$(hostname -d | awk -F"." '{print $(NF-1),".",$NF}' | sed 's/ //g')
-  export CASSANDRA_SEEDS={{ template "kubernetes.name" . }}-0.{{ template "kubernetes.name" . }}.{{ .Release.Namespace }}.svc.$CLUSTER_DOMAIN,{{ template "kubernetes.name" . }}-1.{{ template "kubernetes.name" . }}.{{ .Release.Namespace }}.svc.$CLUSTER_DOMAIN
+  #!/bin/bash
+  source /usr/local/apache-cassandra/scripts/envVars.sh
+  /usr/local/apache-cassandra/scripts/jvm_options.sh
 
   # Replace 10.233.93.174 with the ip of the node down
-  if $(hostname) == 'cassandra-1' && export CASSANDRA_REPLACE_NODE=10.233.93.174
+  test "$(hostname)" == 'cassandra-1' && export CASSANDRA_REPLACE_NODE=10.233.93.174
 
   /run.sh
 ```
