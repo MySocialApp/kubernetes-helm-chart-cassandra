@@ -26,6 +26,7 @@ cassandraConfig:
   memtableCleanupThreshold: 0.2
   rowCacheSizeInMb: 128
   rowCacheSavePeriod: 14400
+cassandraMountPathPrefix: "/mnt/data"
 cassandraJvmOptions: "-XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAMFraction=2"
 cassandraResources: {}
 #  limits:

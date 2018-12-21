@@ -176,7 +176,7 @@ spec:
       volumes:
         - name: cassandra-data
           hostPath:
-            path: /mnt/data/{{ .Release.Namespace }}/cassandra
+            path: {{ .Values.cassandraMountPathPrefix }}/{{ .Release.Namespace }}/cassandra
         - name: {{ template "kubernetes.name" . }}
           configMap:
             name: {{ template "kubernetes.name" . }}
