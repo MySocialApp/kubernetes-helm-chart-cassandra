@@ -3,7 +3,7 @@ language: go
 sudo: required
 
 env:
-  - K8S_VERSION=1.8 GIT_REV=c8ddad845a37b9f675571fc8dde1815a585e6282 HELM_VERSION=2.11.0 NUM_NODES=3 SKIP_SNAPSHOT=y PATH="$HOME/.kubeadm-dind-cluster:/tmp/linux-amd64:$PATH"
+  - K8S_VERSION=1.9 GIT_REV=3cde76608aed0d64895077a0cf2f2e3b9e7323da HELM_VERSION=2.14.1 NUM_NODES=3 SKIP_SNAPSHOT=y PATH="$HOME/.kubeadm-dind-cluster:/tmp/linux-amd64:$PATH"
 
 install:
   - tests/k8s-euft/helm.sh local_install
